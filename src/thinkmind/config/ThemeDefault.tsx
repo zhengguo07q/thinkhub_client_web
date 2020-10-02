@@ -136,6 +136,9 @@ export default {
             borderStyle: 'none',              //边框样式
             borderColor: '#ffffff',           //边框颜色
 
+            paddingX:8, 
+            paddingY:6,
+            
             background: '#a2d1e4',            //背景色
 
             width: 42,                         //宽
