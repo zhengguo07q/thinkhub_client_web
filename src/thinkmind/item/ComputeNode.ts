@@ -1,0 +1,164 @@
+import { NodeAlgoAttrBase } from './NodeAlgoAttr';
+
+
+export class ComputeNode {
+    static computeNodeCaches: Map<string, ComputeNode>;
+
+    id: string;            //id
+    hgap: number;       //垂直间距
+    vgap: number;       //水平间距
+    x: number;          
+    y: number;
+    width: number;
+    height: number;
+    depth: number;
+    parent: ComputeNode;
+    children: ComputeNode[];
+    data: any;
+
+    constructor(data, algoAttr: NodeAlgoAttrBase) {
+        this.vgap = this.hgap = 0
+        if (data instanceof ComputeNode) {
+            return this;
+        }
+        var hgap = algoAttr.getHGap(data);
+        var vgap = algoAttr.getVGap(data);
+        this.data = data;
+        var rect = algoAttr.getWidthAndHeight(data);
+        this.width = rect.width;
+        this.height = rect.height;
+        this.id = algoAttr.getId(data)
+        this.x = this.y = 0
+        this.depth = 0
+
+        if (!this.children) {
+            this.children = []
+        }
+        this.addGap(hgap, vgap)
+    }
+
+    /**
+     * 构建布局节点树
+     * @param data 
+     * @param attrAlgo 
+     * @param isolated 
+     */
+    static build(data, attrAlgo: NodeAlgoAttrBase, isolated): ComputeNode{
+        this.computeNodeCaches = new Map<string, ComputeNode>();
+        
+        var rootNode: ComputeNode = new ComputeNode(data, attrAlgo);
+        this.computeNodeCaches[rootNode.id] = rootNode;
+
+        if (!isolated && !data.isCollapsed) { //不是独立的，也不是收缩状态
+            const nodes: ComputeNode[] = [];        //用来做遍历的对象
+            nodes.push(rootNode);
+            var node: ComputeNode;
+            while (node = nodes.pop()!) {
+                if (!node.data.isCollapsed) {   //不是收缩状态，需要对子节点进行处理
+                    const children = attrAlgo.getChildren(node.data);   //获得attr里到children数据
+                    const length = children ? children.length : 0;      //存在则遍历
+                    node.children = [];
+                    if (children && length) {
+                        for (var i = 0; i < length; i++) {
+                            const child = new ComputeNode(children[i], attrAlgo);   //创建当前节点的子对象
+                            
+                            node.children.push(child);                  //建立子到父的关系
+                            child.parent = node;                        //建立父到子的关系
+                            child.depth = node.depth + 1;               //子对象深度+1
+                            nodes.push(child);                          //把子对象放入需要遍历处理的队列中
+                            this.computeNodeCaches[child.id] = child;   //放到全局缓存里
+                        }
+                    }
+                }
+            }
+        }
+        return rootNode;
+    }
+
+    /**
+     * 判断是否为根节点
+     */
+    isRoot() {
+        return (this.depth === 0)
+    }
+
+    /**
+     * 添加垂直和水平间距
+     * @param hgap 
+     * @param vgap 
+     */
+    addGap(hgap: number, vgap: number) {
+        this.hgap += hgap
+        this.vgap += vgap
+        this.width += 2 * hgap
+        this.height += 2 * vgap
+    }
+
+    /**
+     * 对所有的节点执行回调函数
+     * @param callback 
+     */
+    eachNode(callback: Function) {
+        var nodes: ComputeNode[] = [this];
+        var current: ComputeNode;
+        while (current = nodes.pop()!) {
+            callback(current)
+            nodes = nodes.concat(current.children)
+        }
+    }
+
+    /**
+     * 得到执行节点的bb盒子
+     */
+    getBoundingBox() {
+        const bb = {
+            left: Number.MAX_VALUE,
+            top: Number.MAX_VALUE,
+            width: 0,
+            height: 0
+        }
+        this.eachNode((node: ComputeNode) => {
+            bb.left = Math.min(bb.left, node.x)
+            bb.top = Math.min(bb.top, node.y)
+            bb.width = Math.max(bb.width, node.x + node.width)
+            bb.height = Math.max(bb.height, node.y + node.height)
+        })
+        return bb
+    }
+
+    /**
+     * 对执行对节点包含子节点执行平移
+     * @param tx 
+     * @param ty 
+     */
+    translate(tx = 0, ty = 0) {
+        this.eachNode((node: ComputeNode) => {
+            node.x += tx
+            node.y += ty
+        })
+    }
+
+    /**
+     * 计算执行的节点的bb盒子，并且向左平移
+     */
+    right2left() {
+        const bb = this.getBoundingBox()
+        this.eachNode((node: ComputeNode) => {
+            node.x = node.x - (node.x - bb.left) * 2 - node.width
+        })
+        this.translate(bb.width, 0)
+    }
+
+    /**
+     * 计算执行的节点的bb盒子，并且向上平移
+     */
+    down2up() {
+        const bb = this.getBoundingBox()
+        this.eachNode((node: ComputeNode) => {
+            node.y = node.y - (node.y - bb.top) * 2 - node.height
+        })
+        this.translate(0, bb.height)
+    }
+
+}
+

@@ -1,0 +1,44 @@
+@import "~@alifd/next/variables.scss";
+.container {
+  overflow: hidden;
+  text-align: center;
+  background-color: $color-white;
+}
+
+.areaCenter{
+    align-items: center;
+    background-color:'#ff0';
+}
+.nodeContainer{
+    float: left;
+    width: 120px;
+    height: 60px;
+    background-color: #f6fefe;
+    border: none;
+    padding: 13px;
+}
+
+.nodeRect{
+    width: auto;
+    height: 34px;
+    border-radius: 7px;
+    border: none;
+    background-color: #FF8D3E;
+}
+
+.nodeText{
+    color: #000000;
+    font-weight: bold;
+    font-size: 14px;
+    align-content: center;
+    line-height: 34px;
+}
+
+.nodeSelect{
+    float: right;
+}
+
+.fontTitle{
+    font-size: $font-size-subhead;
+    font-weight: bold;
+}
