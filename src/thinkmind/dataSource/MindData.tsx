@@ -129,7 +129,7 @@ export function createNewNode(content:string){
         content: content,
         childs:[],
         isWrite:false,
-        isLock:true,
+        isLock:false,
     }
     return data;
 }

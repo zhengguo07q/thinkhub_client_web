@@ -2,9 +2,9 @@ import { ThemeType, TopicStyle } from './Theme';
 import ThemeDefault from './ThemeDefault';
 
 export enum LevelType {
-    ROOT,
-    PRIMARY,
-    NORMAL,
+    ROOT = 1,
+    PRIMARY = 2,
+    NORMAL = 3,
 }
 
 export class ThemeUtil {

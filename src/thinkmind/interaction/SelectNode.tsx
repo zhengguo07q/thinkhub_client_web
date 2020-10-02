@@ -7,6 +7,7 @@ import { RenderContext, RenderObject } from '../render/RenderContext';
 
 export class SelectNode extends ContextHolder{
     shiftState:boolean = false;
+    selectId:string = '';
 
     initialize(){
         this.shiftState = false;
@@ -34,7 +35,7 @@ export class SelectNode extends ContextHolder{
      * @param event 
      * @param node 
      */
-    eventForeignClick(event: MouseEvent, node:VNode){
+    eventBorderClick(event: MouseEvent, node:VNode){
         let foreign: any = event.currentTarget;
         let nodeId = RenderUtil.getIdBySel(foreign.id);
 
@@ -68,9 +69,14 @@ export class SelectNode extends ContextHolder{
      * @param event 
      * @param node 
      */
-    eventForeignOver(event: MouseEvent, node:VNode){
+    eventBorderEnter(event: MouseEvent, node:VNode){
+        if(this.checkToInner(event)){       //进入时跟内部有关系，
+            return ;
+        }
+        console.log("eventBorderEnter", event, node);
         let foreign: any = event.currentTarget;
         let nodeId = RenderUtil.getIdBySel(foreign.id);
+        this.selectId = nodeId;
         let textarea: HTMLTextAreaElement = document.getElementById(RenderObject.NodeBorder + nodeId) as HTMLTextAreaElement;
         textarea.style.stroke = this.sceneContext.nodeLayer.backgroundAttr.highlightColor;  //设置边框颜色
     }
@@ -80,13 +86,29 @@ export class SelectNode extends ContextHolder{
      * @param event 
      * @param node 
      */
-    eventForeignOut(event: MouseEvent, node:VNode){
+    eventBorderLeave(event: MouseEvent, node:VNode){
+        if(this.checkToInner(event)){       //目的是内部，返回
+            return ;
+        }
         let foreign: any = event.currentTarget;
         let nodeId = RenderUtil.getIdBySel(foreign.id);
         if(this.sceneContext.nodeLayer.selIdSet.has(nodeId) == false){
             let textarea: HTMLTextAreaElement = document.getElementById(RenderObject.NodeBorder + nodeId) as HTMLTextAreaElement;
             textarea.style.stroke = 'none';
         }
+    }
+
+    /**
+     * 只要有目的为SVGForeignObjectElement 则说明这个移动与内部有关系
+     * @param event 
+     */
+    checkToInner(event: MouseEvent):boolean{
+        let src:SVGElement = (event.target|| event.srcElement) as SVGElement;
+        let to:SVGElement = event.relatedTarget as SVGElement;
+        if((src  && src.localName == "foreignObject") || (to && to.localName == "foreignObject")){
+            return true;
+        }
+        return false;
     }
 
     destory(){

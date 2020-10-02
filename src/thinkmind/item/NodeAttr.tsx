@@ -74,6 +74,7 @@ export class NodeAttr{
     createNodeAttr(newData:MindData) :NodeAttr{
         let topic = ThemeUtil.getSubTopicStyle(this.themeLevel);
         let item: NodeAttr = NodeAttr.fromTheme(topic.contentStyle);
+        newData.content = topic.contentStyle.content;
         item.data = newData;
         item.linkAttr = LinkAttr.fromTheme(topic.linkStyle);
         return item;

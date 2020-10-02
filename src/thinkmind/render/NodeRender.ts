@@ -14,33 +14,20 @@ import { EventHelper } from '../util/EventHelper';
         </rect>
     </g>
  */
-export class NodeRender  {
-    render(renderContext:RenderContext, computeNode: ComputeNode): VNode[] {
+export class NodeRender {
+    render(renderContext: RenderContext, computeNode: ComputeNode): VNode[] {
         const attr: NodeAttr = computeNode.data
-        
+
         const x = Math.round(computeNode.x + computeNode.hgap)
         const y = Math.round(computeNode.y + computeNode.vgap)
         const width = Math.round(computeNode.width - computeNode.hgap * 2)
         const height = Math.round(computeNode.height - computeNode.vgap * 2)
-        
+
         const contentWidth = Math.round(width - 2 * attr.paddingX);
         const contentHeight = Math.round(height - 2 * attr.paddingY);
 
         return [
             h("g#" + attr.data.id, { ns: RenderContext.NS_svg, attrs: { transform: 'translate(' + x + ' ' + y + ')' } }, [
-                h("rect#" + RenderObject.NodeRect + attr.data.id,
-                    {
-                        attrs:
-                        {
-                            width: width,
-                            height: height,
-                            rx: attr.borderRadius,
-                            ry: attr.borderRadius,
-                            stroke: attr.borderColor,
-                            fill: attr.background
-                        },
-                        ns: RenderContext.NS_svg
-                    }),
                 h("rect#" + RenderObject.NodeBorder + attr.data.id,
                     {
                         attrs:
@@ -54,8 +41,26 @@ export class NodeRender  {
                         },
                         style: {
                             stroke: 'none',
-                            strokeWidth : renderContext.backgroundAttr.borderWidthSelect,
-                            fill:'none',
+                            strokeWidth: renderContext.backgroundAttr.borderWidthSelect,
+                            fill: 'none',
+                        },
+                        ns: RenderContext.NS_svg
+                    }),
+                h("rect#" + RenderObject.NodeRect + attr.data.id,
+                    {
+                        attrs:
+                        {
+                            width: width,
+                            height: height,
+                            rx: attr.borderRadius,
+                            ry: attr.borderRadius,
+                            stroke: attr.borderColor,
+                            fill: attr.background
+                        },
+                        on:{
+                            mouseenter: EventHelper.eventBorderEnter,
+                            mouseleave: EventHelper.eventBorderLeave,
+                            click: EventHelper.eventBorderClick,
                         },
                         ns: RenderContext.NS_svg
                     }),
@@ -72,10 +77,7 @@ export class NodeRender  {
                         },
                         on:
                         {
-                            mouseover: EventHelper.eventForeignOver,
-                            mouseout: EventHelper.eventForeignOut,
                             dblclick: EventHelper.eventForeignDbClick,
-                            click: EventHelper.eventForeignClick,
                         },
                         ns: RenderContext.NS_svg
                     }, [
@@ -102,7 +104,7 @@ export class NodeRender  {
      * 获得文本域的样式对象
      * @param attr 
      */
-    static getTextStyleObject(attr:NodeAttr, object:any):any{
+    static getTextStyleObject(attr: NodeAttr, object: any): any {
         return Object.assign({ //white-space: pre-wrap; word-break: break-word; pointer-events: none; user-select: none;
             resize: 'none',
             border: '0 none',

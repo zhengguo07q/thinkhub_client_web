@@ -26,8 +26,7 @@ export class CreateNode extends ContextHolder {
         //对每个选择的对象，根据样式，得到基本属性，然后传递去存储
         nodeLayer.selIdSet.forEach((id) => {
             let pAttr = nodeLayer.items.get(id)!;
-            let topic:TopicStyle = ThemeUtil.getSubTopicStyle(pAttr?.themeLevel);
-            let newData: MindData = createNewNode(topic.contentStyle.content) as MindData;
+            let newData: MindData = createNewNode('') as MindData;
             let cAttr = pAttr.addNodeAttrChild(newData);
             nodeLayer.items.set(cAttr.data.id, cAttr);       //添加attr缓存
         });

@@ -3,20 +3,19 @@ import { InputContent } from '@/thinkmind/interaction/InputContent';
 import { SelectNode } from '../interaction';
 
 export class EventHelper{
-    static eventForeignOver(e:MouseEvent, n:VNode){
-        
+    static eventBorderEnter(e:MouseEvent, n:VNode){
         let selectNode = SelectNode.getInstance<SelectNode>();
-        selectNode.eventForeignOver.bind(selectNode, e, n)();
+        selectNode.eventBorderEnter.bind(selectNode, e, n)();
     }
 
-    static eventForeignOut(e:MouseEvent, n:VNode){
+    static eventBorderLeave(e:MouseEvent, n:VNode){
         let selectNode = SelectNode.getInstance<SelectNode>();
-        selectNode.eventForeignOut.bind(selectNode, e, n)();
+        selectNode.eventBorderLeave.bind(selectNode, e, n)();
     }
 
-    static eventForeignClick(e:MouseEvent, n:VNode){
+    static eventBorderClick(e:MouseEvent, n:VNode){
         let selectNode = SelectNode.getInstance<SelectNode>();
-        selectNode.eventForeignClick.bind(selectNode, e, n)();
+        selectNode.eventBorderClick.bind(selectNode, e, n)();
     }
 
     static eventForeignDbClick(e:MouseEvent, n:VNode){
