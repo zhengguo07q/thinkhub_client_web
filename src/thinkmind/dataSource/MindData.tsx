@@ -20,7 +20,7 @@ export type MindData = {
     id:string;
     pid:string;
     content:string;
-    type?:string;  //这个类型决定了text里面的内容和格式
+    type?:MindTagType;  //这个类型决定了text里面的内容和格式
     format?:string;
     
     //所有对象都含有的节点
@@ -127,9 +127,29 @@ export function createNewNode(content:string){
         id: UUID(),
         pid:'',
         content: content,
+        type: MindTagType.NODE,
         childs:[],
         isWrite:false,
         isLock:false,
     }
+    return data;
+}
+
+/**
+ * 创建一个引用节点
+ * @param node 
+ */
+export function createRefNode(node:MindData){
+    let data = {
+        id: UUID(),
+        pid:'',
+        content: node.content,
+        type: MindTagType.REF,
+        childs:[],
+        isWrite:false,
+        isLock:false,
+    };
+    
+    (data as MindData).childs.push(node.id);
     return data;
 }
