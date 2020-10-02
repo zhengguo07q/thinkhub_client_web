@@ -73,7 +73,6 @@ export class SelectNode extends ContextHolder{
         if(this.checkToInner(event)){       //进入时跟内部有关系，
             return ;
         }
-        console.log("eventBorderEnter", event, node);
         let foreign: any = event.currentTarget;
         let nodeId = RenderUtil.getIdBySel(foreign.id);
         this.selectId = nodeId;

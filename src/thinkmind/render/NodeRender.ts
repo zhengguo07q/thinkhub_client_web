@@ -77,6 +77,7 @@ export class NodeRender {
                         },
                         on:
                         {
+                            click: EventHelper.eventBorderClick,
                             dblclick: EventHelper.eventForeignDbClick,
                         },
                         ns: RenderContext.NS_svg
