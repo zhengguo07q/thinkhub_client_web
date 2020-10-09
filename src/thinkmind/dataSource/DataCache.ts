@@ -1,11 +1,13 @@
 import MindSource from './MindSource';
-import { MindData, MindTabType } from './MindData';
+import { MindData, MindTabType, MindTagType } from './MindData';
 import { JsonCreate } from '../interaction/JsonCreate';
 import StorageUtil from './StorageUtil';
 import { EventManager, EventType } from '../util/Event';
+import log, {Logger} from 'loglevel';
 
 
 class DataCache {
+    logger: Logger = log.getLogger("DataCache");
     treeMap: Map<string, MindData> = new Map<string, MindData>();
     cacheCrumbs: MindData[] = [];
     cacheSiblings: MindData[] = [];
@@ -15,6 +17,7 @@ class DataCache {
 
 
     async setRootDefault(){
+        console.info("set default root");
         let defaultRoot = await MindSource.getDefaultRoot();
         await this.setRoot(defaultRoot.id);
     }
@@ -28,7 +31,9 @@ class DataCache {
         if(id == undefined){
             return;
         }
-        this.rootId = id;
+        this.logger.info("set root: ", id, " level: ", this.depth);
+
+        this.rootId = await this.checkReferenceRoot(id);
         await this.getSubTreeByDepth(this.depth); 
         await this.updateRecentReference();
         await this.updateNodeCrumb();
@@ -79,6 +84,26 @@ class DataCache {
             }
         }
         this.cacheSiblings = siblings;
+    }
+
+
+    /**
+     * 检查跟节点是否为引用，如果为引用则返回它下面的子节点实体，不是原路返回
+     * @param id 
+     */
+    async checkReferenceRoot(id:string){
+        let realId = id;
+        let checkedNode = await StorageUtil.get(id);
+        if(checkedNode.type == MindTagType.REF){
+            let sNodeId = checkedNode.childs[0];
+            if(sNodeId == undefined){
+                this.logger.error("checkReferenceRoot error, id:", id, 'childs length = 0');
+            }
+            let realNode = await StorageUtil.get(sNodeId);
+            realId = realNode.id;
+        }
+        this.logger.debug("checkReferenceRoot, src id:", id, "real id:", realId);
+        return realId;
     }
 
     /**

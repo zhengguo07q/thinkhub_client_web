@@ -8,6 +8,8 @@
     "@alifd/theme-thinkhub": "^0.1.0",
     "@antv/data-set": "^0.11.6",
     "@icedesign/img": "^1.0.4",
+    "@svgdotjs/svg.draggable.js": "^3.0.2",
+    "@svgdotjs/svg.js": "^3.0.16",
     "@types/jquery": "^3.5.1",
     "@types/lowdb": "^1.0.9",
     "@types/mousetrap": "^1.6.3",
@@ -34,7 +36,9 @@
     "react-dom": "^16.4.1",
     "react-intl": "^5.8.2",
     "react-sortablejs": "^2.0.11",
+    "save-dev": "^0.0.1-security",
     "snabbdom": "^2.1.0",
+    "svg.draggy.js": "^1.1.1",
     "tyrdb": "^3.0.2"
   },
   "devDependencies": {

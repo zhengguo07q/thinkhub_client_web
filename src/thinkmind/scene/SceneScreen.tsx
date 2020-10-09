@@ -1,23 +1,25 @@
 import { SceneContext } from '../util/Interface';
-import { NodeLayer } from '../layer/NodeLayer';
+import { NodeLayer } from './NodeLayer';
 import { AppHistory } from './AppHistory';
 
-import { CopyPaste, DragNode, CreateNode, JsonCreate, SelectNode } from '../interaction'
-import  MindSource  from '../dataSource/MindSource';
+import { CopyPaste, CreateNode, DragNode, JsonCreate, SelectNode } from '../interaction'
 import { RenderManager } from '../render/RenderManager';
 import { InputContent } from '../interaction/InputContent';
 import { MoveScreen } from '../interaction/MoveScreen';
 import { DeleteNode } from '../interaction/DeleteNode';
 import { SetRootNode } from '../interaction/SetRootNode';
-import { BackgroundAttr } from '../item/BackgoundAttr';
 import DataCache from '../dataSource/DataCache';
 
+import log, {Logger} from 'loglevel'
+
 export class SceneScreen{
+    static logger :Logger = log.getLogger("SceneScreen");
     static context: SceneContext;
     /**
      * 全局初始化
      */
     static global(rootElement:HTMLElement){
+        this.logger.info("start thinkhub");
         var nodeLayer = new NodeLayer();
         var appHistory = AppHistory.fromState(nodeLayer);
         SceneScreen.context = 
@@ -29,9 +31,9 @@ export class SceneScreen{
 
         this.interaction();
 
-        MindSource.initialize();
         RenderManager.initialize(rootElement);
-        setTimeout(()=>{DataCache.setRootDefault(), 1000});
+        this.logger.info("end thinkhub");
+        DataCache.setRootDefault();
     }
 
     /**
@@ -40,13 +42,13 @@ export class SceneScreen{
     static interaction(){
         InputContent.build(InputContent, SceneScreen.context);
         CopyPaste.build(CopyPaste, SceneScreen.context);
-       // DragNode.build<DragNode>(DragNode, this.sceneContext);
         CreateNode.build(CreateNode, SceneScreen.context);
         JsonCreate.build(JsonCreate, SceneScreen.context);
         SelectNode.build(SelectNode, SceneScreen.context);
         MoveScreen.build(MoveScreen, SceneScreen.context);
         DeleteNode.build(DeleteNode, SceneScreen.context);
         SetRootNode.build(SetRootNode, SceneScreen.context);
+        DragNode.build(DragNode, SceneScreen.context);
     }
 
     /**
@@ -55,12 +57,12 @@ export class SceneScreen{
     static unteraction(){
         InputContent.build(InputContent, SceneScreen.context).destory;
         CopyPaste.build(CopyPaste, SceneScreen.context).destory();
-      //  DragNode.build<DragNode>(DragNode, this.sceneContext).destory();
         CreateNode.build(CreateNode, SceneScreen.context).destory();
         JsonCreate.build(JsonCreate, SceneScreen.context).destory();
         SelectNode.build(SelectNode, SceneScreen.context).destory();
         MoveScreen.build(MoveScreen, SceneScreen.context).destory();
-        SetRootNode.build(SetRootNode, SceneScreen.context);
+        SetRootNode.build(SetRootNode, SceneScreen.context).destory();
+        DragNode.build(DragNode, SceneScreen.context).destory();
     }
 
 

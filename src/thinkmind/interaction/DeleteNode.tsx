@@ -19,8 +19,17 @@ export class DeleteNode extends ContextHolder{
         nodeLayer.selIdSet.forEach((id)=>{
             let nodeAttr = nodeLayer.items.get(id)!;
             if(nodeAttr.data.isLock){
-                EventManager.dispatcher(EventType.Message, {content:"此节点不允许被删除"})
+                EventManager.dispatcher(EventType.Message, {content: nodeAttr.data.content + " 节点不允许被删除"})
                 return ;
+            }
+            
+            let hideNodes = nodeAttr.getHideNode();
+            if(hideNodes.length > 0){
+                let hidesStr = "";
+                hideNodes.forEach((node)=>{
+                    hidesStr += node.data.content + ', '
+                });
+                EventManager.dispatcher(EventType.Dialog, {content: hidesStr + " 节点包含有没有显示的子节点，确认删除？"})
             }
             
             nodeAttr.removeNodeAttrChildAll(nodeLayer.items);
@@ -32,6 +41,10 @@ export class DeleteNode extends ContextHolder{
         
         let rootComputeNode = LayoutManager.getInstance().layout();
         RenderManager.fastRender(rootComputeNode, nodeLayer.backgroundAttr);
+    }
+
+    deleteCallback(){
+
     }
 
     destory(){

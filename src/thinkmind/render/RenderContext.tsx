@@ -3,23 +3,28 @@ import { BackgroundAttr } from '../item/BackgoundAttr'
 import { ComputeNode } from '../item/ComputeNode';
 import { VNode } from 'snabbdom/build/package/vnode';
 import { h } from 'snabbdom/build/package/h';
+import { EventHelper } from '../util/EventHelper';
 
 
 export enum RenderLayerType{
     Background,
     Node,
+    NodeExts,
 }
 
 export type RenderCache = {
-    nodes:VNode[],
     container:VNode,
+    nodes:VNode[],
+    nodeExts:VNode[],
 }
 
 export const RenderObject = {
-    NodeRect: "nr@",
-    NodeBorder: "nb@",
-    NodeForeignObject: "nf@",
-    NodeTextarea: "nt@",
+    NodeGroup: "ng_",
+    NodeRect: "nr_",
+    NodeBorder: "nb_",
+    NodeForeignObject: "nf_",
+    NodeTextarea: "nt_",
+    NodeExt:"ex_",
 }
 
 /**
@@ -37,8 +42,9 @@ export class RenderContext{
     backgroundAttr:BackgroundAttr;
 
     private renderCache: RenderCache = {
+        container: h(""),
         nodes:[],
-        container: h("") 
+        nodeExts:[],
     };
 
     initialize(){
@@ -90,6 +96,9 @@ export class RenderContext{
                 margin: '0',
                 border: '0',
                 padding: '0',
+            },
+            on:{
+                click: EventHelper.eventBackgroundClick,
             }
         })])];
 
@@ -104,6 +113,8 @@ export class RenderContext{
     update(layer:RenderLayerType, node:VNode[]){
         if(layer == RenderLayerType.Node){
             this.renderCache.nodes = node as VNode[];
+        }else if(layer == RenderLayerType.NodeExts){
+            this.renderCache.nodeExts = node as VNode[];
         }
     }
 
@@ -112,6 +123,7 @@ export class RenderContext{
      */
     commit(){
         var svg:VNode = this.renderCache.container.children![0] as VNode;
+        svg.children = svg.children!.concat(this.renderCache.nodeExts);
         svg.children = svg.children!.concat(this.renderCache.nodes);
         this.vnodeRoot = this.patch(this.vnodeRoot, this.renderCache.container);
     }

@@ -1,9 +1,11 @@
 import { BackgroundAttr } from '../item/BackgoundAttr';
 import { ComputeNode } from '../item/ComputeNode';
 import { NodeRender } from './NodeRender';
-import { RenderContext, RenderLayerType } from './RenderContext';
+import { RenderContext, RenderLayerType ,RenderObject} from './RenderContext';
 import { LinkRender } from './LinkRender';
 import { VNode } from 'snabbdom/build/package/vnode';
+
+import { DragNode } from '../interaction';
 
 export enum NodeRenderType {
     Rectangle,
@@ -72,6 +74,19 @@ export class RenderManager {
     }
 
     /**
+     * 渲染一些其他扩展性项目
+     * @param rootComputeNode 
+     */
+    static renderExts(rootComputeNode: ComputeNode){
+        this.nodeRender.renderExts(rootComputeNode);
+        let vnodes: VNode[] = [];
+        rootComputeNode.eachNode((node: ComputeNode) => {
+            vnodes = vnodes.concat(this.nodeRender.renderExts(node));
+        });
+        this.renderContext.update(RenderLayerType.NodeExts, vnodes);
+    }
+
+    /**
      * 组合渲染
      * @param subs 
      * @param subslist 
@@ -87,7 +102,9 @@ export class RenderManager {
     static fastRender(rootComputeNode: ComputeNode, backgroundAttr:BackgroundAttr) {
         this.renderBackgound(rootComputeNode, backgroundAttr);
         this.renderNode(rootComputeNode);
+        this.renderExts(rootComputeNode);
         this.commit();
+
         backgroundAttr.scroll();
     }
 } 

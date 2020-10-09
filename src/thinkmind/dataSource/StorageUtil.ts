@@ -1,11 +1,13 @@
-import { logger } from 'ice'
 import { MindData } from './MindData';
+import log, { Logger } from 'loglevel';
 
 type NewDatabase = {
     isNew:boolean
 }
 
 class StorageUtil {
+    logger:Logger = log.getLogger("StorageUtil");
+
     databaseName = "thinkhub";
     tableName = "mindnode";
     keyId = "id";
@@ -21,24 +23,25 @@ class StorageUtil {
     openDatabase() {
         let that = this;
         let promise = new Promise<NewDatabase>((resolve, reject)=>{
+            that.logger.info("openDatabase")
             let request:IDBOpenDBRequest = window.indexedDB.open(this.databaseName, this.version);
             
             request.onerror = function (event) {
-                logger.error('数据库打开报错');
+                that.logger.error('数据库打开报错');
             };
             request.onsuccess = function (event) {
                 that.db = (event.target as IDBOpenDBRequest).result;
-                logger.trace('数据库打开成功');
+                that.logger.info('数据库打开成功');
                 resolve({isNew:false});
             };
             request.onupgradeneeded = function (event:IDBVersionChangeEvent) {
-                logger.trace("创建新的数据库", that.databaseName);
+                that.logger.info("创建新的数据库", that.databaseName);
                 that.db = (event!.target as IDBOpenDBRequest).result;
 
                 if (!that.db.objectStoreNames.contains(that.tableName)) {
                     let objectStore:IDBObjectStore = that.db.createObjectStore(that.tableName, { keyPath: that.keyId });
                     objectStore.createIndex('content', 'content', { unique: false });
-                    logger.trace("创建表成功", that.tableName);
+                    that.logger.info("创建表成功", that.tableName);
                     objectStore.transaction.oncomplete = function (params) {
                         resolve({isNew:true});
                     }
@@ -59,12 +62,12 @@ class StorageUtil {
             var request = that.db.transaction(that.tableName, 'readwrite').objectStore(that.tableName).add(val);
 
             request.onsuccess = function (event) {
-                logger.trace('数据写入成功');
+                that.logger.debug('数据写入成功,', val);
                 resolve();
             };
     
             request.onerror = function (event) {
-                logger.trace('数据写入失败');
+                that.logger.error('数据写入失败', val);
                 reject();
             }
         })
@@ -84,12 +87,12 @@ class StorageUtil {
                 .put(val);
 
             request.onsuccess = function (event) {
-                logger.trace('数据更新成功');
+                that.logger.debug('数据更新成功', val);
                 resolve();
             };
 
             request.onerror = function (event) {
-                logger.trace('数据更新失败');
+                that.logger.error('数据更新失败', val);
                 reject();
             }
         });
@@ -112,9 +115,9 @@ class StorageUtil {
             var transaction = that.db.transaction([that.tableName]);
             var objectStore = transaction.objectStore(that.tableName);
             var request = objectStore.get(id);
-
+            that.logger.debug("get  id:", id);
             request.onerror = function (event) {
-                logger.trace('事务失败');
+                that.logger.error('事务失败, id', id);
                 reject();
             };
 
@@ -124,7 +127,7 @@ class StorageUtil {
                     that.dataCache.set(data.id, data);
                     resolve(data)
                 } else {
-                    logger.trace('未获得数据记录');
+                    that.logger.error('未获得数据记录, id:', id);
                 }
             };
         });
@@ -142,6 +145,7 @@ class StorageUtil {
         let promise = new Promise<MindData>((resolve, reject)=>{
             var transaction = that.db.transaction([that.tableName], 'readonly');
             var store = transaction.objectStore(that.tableName);
+            that.logger.debug("query  key:", indexName, " value:", value);
             var index = store.index(indexName);
             var request = index.get(value);
 
@@ -151,7 +155,7 @@ class StorageUtil {
                     that.dataCache.set(data.id, data);
                     resolve(data);
                 } else {
-                    logger.trace('未获得数据记录');
+                    that.logger.error('未获得数据记录, key:', indexName, " value:", value);
                 }
             }});
         return promise;
@@ -170,7 +174,7 @@ class StorageUtil {
 
             request.onsuccess = function (event) {
                 that.dataCache.delete(id);
-                logger.trace('数据删除成功');
+                that.logger.debug('数据删除成功', id);
                 resolve(id);
             };
         });

@@ -7,7 +7,7 @@ import log, { Logger } from 'loglevel';
  * 原则，管理的数据里面都是必须数据，而且可以直接导出的结构数据。
  */
 class MindSource {
-    logger = log.getLogger('MindSource');
+    logger:Logger = log.getLogger('MindSource');
 
     rootData: MindData;                          //根节点，原生对象，其他数据不应该保存在里面
     ROOT; //保存数据库的根节点
@@ -30,8 +30,6 @@ class MindSource {
     isInit: boolean = false;
     MAX_RECENT: number = 10;
 
-    initialize() { }
-    destory() { }
 
     async getDefaultRoot() {
         await this.checkLoad();
@@ -39,9 +37,11 @@ class MindSource {
     }
 
     async checkLoad() {
+        this.logger.info("load db");
         if (this.isInit) {
             return;
         }
+        
         const openRes = await StorageUtil.openDatabase();
         if (openRes.isNew == true) {
             for (let i = 0; i < MindDataInitialize.length; i++) {
@@ -196,7 +196,6 @@ class MindSource {
         } else {
             data.isSubVisible = false;
         }
-        this.logger.debug(childNodes.values());
         return childNodes;
     }
 

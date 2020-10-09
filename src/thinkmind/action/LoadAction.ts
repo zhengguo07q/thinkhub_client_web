@@ -1,6 +1,6 @@
 import { OrderedSet } from 'immutable'
 import { Action } from './Action'
-import { NodeLayer } from '../layer/NodeLayer'
+import { NodeLayer } from '../scene/NodeLayer'
 import { AppHistory } from '../scene/AppHistory';
 
 export default class LoadAction extends Action {

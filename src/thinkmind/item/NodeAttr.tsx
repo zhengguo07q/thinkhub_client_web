@@ -1,13 +1,16 @@
 import { ThemeUtil } from '../config/ThemeUtil';
-import { MindData } from '../dataSource/MindData';
 import { SceneScreen } from '../scene/SceneScreen';
 import { LinkAttr } from './LinkAttr';
 import DataCache from '../dataSource/DataCache';
+import { createNewNode, MindData } from '../dataSource/MindData';
+import { TypeUtil } from '../util/TypeUtil';
 
 /**
  * 属性指代的是可被人直接操控的属性
  */
 export class NodeAttr{
+    static dragNode:NodeAttr|undefined;               //拖拽节点，如果之前有，需要删除
+
     data:MindData;
     isCollapsed:boolean = false;            //是否闭合
 
@@ -81,6 +84,25 @@ export class NodeAttr{
     } 
 
     /**
+     * 添加一个拖拽节点到显示中，永远只存在一个拖拽节点
+     * @param refItems 
+     */
+    addNodeAttrDrag(refItems: Map<string, NodeAttr>, pos:number){
+        if(NodeAttr.dragNode != undefined){
+            let dragData = NodeAttr.dragNode.data;
+            let pNode = refItems.get(dragData.pid)!;
+            TypeUtil.arrayRemove(pNode.data.childs, dragData.id);       //从父中删除
+            refItems.delete(NodeAttr.dragNode.data.id);
+            NodeAttr.dragNode = undefined;
+        }
+        let newData: MindData = createNewNode('') as MindData;
+        NodeAttr.dragNode = this.createNodeAttr(newData);
+        this.data.childs.push(NodeAttr.dragNode.data.id);               //插入位置
+        NodeAttr.dragNode.data.pid = this.data.id;
+        refItems.set(NodeAttr.dragNode.data.pid, NodeAttr.dragNode);
+    }
+
+    /**
      * 存储返回调用, 添加子节点
      * @param newData 
      */
@@ -119,5 +141,19 @@ export class NodeAttr{
     updateConent(content:string){
         this.data.content = content;
         DataCache.updateNode(this.data);
+    }
+
+
+    /**
+     * 得到含有隐藏节点的列表
+     */
+    getHideNode():NodeAttr[]{
+        let hides:NodeAttr[] = [];
+        this.eachNode((node:NodeAttr)=>{
+            if(node.data.isSubVisible == false && node.data.childs.length>0){ //子对象不显示而且含有子对象
+                hides.push(node);
+            }
+        })
+        return hides;
     }
 } 

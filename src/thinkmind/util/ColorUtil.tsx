@@ -1,4 +1,4 @@
-import ColorNamed from './ColorNamed';
+import {ColorNamed} from './ColorNamed';
 
 const round = Math.round
 
@@ -254,10 +254,22 @@ export class Color {
         return result.sanitize()
     }
     static fromString(/* String */ str) {
-        const s = Color.ColorNamed[str]
+        const s = ColorNamed[str]
         return s && Color.fromHex(s) ||
             Color.fromRgb(str) ||
             Color.fromHex(str) ||
             Color.fromHsl(str)
+    }
+
+    static COLORNAME_KEYS:string[] = [];
+
+    static randomColor(){
+        if(Color.COLORNAME_KEYS.length == 0){
+            for(let k in ColorNamed){
+                Color.COLORNAME_KEYS.push(k);
+            }
+        }
+        let key = Color.COLORNAME_KEYS[Math.floor(Math.random() * Color.COLORNAME_KEYS.length )];
+        return ColorNamed[key];
     }
 }

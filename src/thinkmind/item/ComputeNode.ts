@@ -1,8 +1,10 @@
+import { Point } from '../util/Interface';
 import { NodeAlgoAttrBase } from './NodeAlgoAttr';
-
+import log, {Logger} from 'loglevel';
 
 export class ComputeNode {
     static computeNodeCaches: Map<string, ComputeNode>;
+    logger:Logger = log.getLogger("ComputeNode");
 
     id: string;            //id
     hgap: number;       //垂直间距
@@ -15,6 +17,7 @@ export class ComputeNode {
     parent: ComputeNode;
     children: ComputeNode[];
     data: any;
+    showBBox:boolean = false;
 
     constructor(data, algoAttr: NodeAlgoAttrBase) {
         this.vgap = this.hgap = 0
@@ -160,5 +163,43 @@ export class ComputeNode {
         this.translate(0, bb.height)
     }
 
+    /**
+     * 得到命中节点
+     * @param p 
+     */
+    getHit(p:Point):ComputeNode{
+        let hitNode:ComputeNode = this;
+        this.eachNode((node:ComputeNode)=>{
+            if(node.isHit(p)){
+                hitNode = node;
+                return hitNode;
+            }
+        })
+        return hitNode;
+    }
+
+    getSubPosition(p:Point):number{
+        let pos:number = 0;
+        this.children.forEach((node:ComputeNode)=>{
+            let bbox = node.getBoundingBox();
+            let heightLine = (bbox.top + bbox.height)/2;
+            if(p.x > heightLine){
+                pos += 1;
+            }
+        });
+        return pos;
+    }
+
+    /**
+     * 检测命中
+     * @param p 
+     */
+    isHit(p:Point):boolean{
+        const {left, top, width, height} = this.getBoundingBox();   //左位置，顶位置， 右位置， 下位置
+        if(p.x > left && p.x <  width && p.y > top && p.y < height){
+            return true;
+        }
+        return false;
+    }
 }
 

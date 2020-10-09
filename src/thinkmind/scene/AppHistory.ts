@@ -1,5 +1,5 @@
 import { List, Record } from 'immutable'
-import { NodeLayer } from '../layer/NodeLayer'
+import { NodeLayer } from './NodeLayer'
 import { Action } from '../action'
 
 export const emptyAction = Symbol('empty-action') 

@@ -5,10 +5,10 @@ import { nonLayeredTidyTreeAlgorithms } from '../algorithms/NonLayeredTidyTreeAl
 export class StandardLayout extends BaseLayout {
     doLayout() {
         // separate into left and right trees
-        const leftTree = ComputeNode.build(this.root.data, this.algoAttr, true)
-        const rightTree = ComputeNode.build(this.root.data, this.algoAttr, true)
+        const leftTree = ComputeNode.build(this.root.data, this.algoAttr, true)     //左边树
+        const rightTree = ComputeNode.build(this.root.data, this.algoAttr, true)    //右边树
         const treeSize = this.root.children.length
-        const rightTreeSize = Math.round(treeSize / 2)
+        const rightTreeSize = Math.round(treeSize / 2)  //右边树大小
         for (let i = 0; i < treeSize; i++) {
             const child = this.root.children[i]
             if (i < rightTreeSize) {

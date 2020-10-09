@@ -1,4 +1,3 @@
-import { node } from 'prop-types';
 import { BackgroundAttr } from '../item/BackgoundAttr';
 import { ComputeNode } from '../item/ComputeNode';
 import { NodeAlgoAttrBase } from '../item/NodeAlgoAttr';
@@ -9,6 +8,7 @@ import { LeftLogicalLayout } from './layouts/LeftLogicalLayout';
 import { RightLogicalLayout } from './layouts/RightLogicalLayout';
 import { StandardLayout } from './layouts/StandardLayout';
 import { UpwardOrganizationalLayout } from './layouts/UpwardOrganizationalLayout';
+import log, {Logger} from 'loglevel';
 
 export enum LayoutType {
     LeftLogical,
@@ -28,6 +28,7 @@ const HORIZONTAL_LAYOUTS = [
  * 画布大小，画布永远为内容宽高+2屏幕宽高
  */
 export class LayoutManager {
+    logger:Logger = log.getLogger("LayoutManager");
     static instance:LayoutManager;
     layoutType: LayoutType = LayoutType.Standard;
     root: any;
@@ -77,10 +78,6 @@ export class LayoutManager {
         this.backgroundAttr = backgroundAttr;
         this.extraEdges = extraEdges;
         this.markChange();
-    }
-
-    setCanvas(width, height){
-
     }
 
     /**
@@ -162,6 +159,15 @@ export class LayoutManager {
         }
     }
 
+    /**
+     * 显示插入位置
+     * @param p 
+     */
+    getInserObject(p:Point){
+        let root = this.layoutTree.getRoot();
+        let hitNode = root.getHit(p);
+        return hitNode;
+    }
 
     tree(){
         console.log('ComputeNode: ');

@@ -9,6 +9,6 @@ const appConfig = {
     },
 };
 
-logger.setDefaultLevel("debug");
+logger.setDefaultLevel("trace");
 
 createApp(appConfig);

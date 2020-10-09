@@ -1,12 +1,6 @@
-import { TopicStyle } from '../config/Theme';
-import { NodeAttr } from '../item/NodeAttr';
 import { ContextHolder } from '../util/ContextHolder';
 import Mousetrap from 'mousetrap';
-import { ThemeUtil } from '../config/ThemeUtil';
-import { UUID } from '../util/MathUtil';
-import { LinkAttr } from '../item/LinkAttr';
 import { createNewNode, MindData } from '../dataSource/MindData';
-import DataCache from '../dataSource/DataCache';
 import { LayoutManager } from '../layout/LayoutManager';
 import { RenderManager } from '../render/RenderManager';
 

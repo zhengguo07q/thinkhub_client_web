@@ -11,13 +11,14 @@ export class SelectNode extends ContextHolder{
 
     initialize(){
         this.shiftState = false;
-        document.addEventListener('keydown', this.eventShiftDown.bind(this))   //shift只有down up事件
-        document.addEventListener('keyup', this.eventShiftKeyUp.bind(this))
+        document.addEventListener('keydown', this.eventShiftDown)   //shift只有down up事件
+        document.addEventListener('keyup', this.eventShiftKeyUp)
     }
 
     eventShiftDown(event: KeyboardEvent){
+        let that = SelectNode.getInstance<SelectNode>();
         if(event.key == 'Shift'){
-            this.shiftState = true;
+            that.shiftState = true;
         }
     }
 
@@ -25,8 +26,9 @@ export class SelectNode extends ContextHolder{
      * 弹起shift键盘事件，
      */
     eventShiftKeyUp(event: KeyboardEvent){
+        let that = SelectNode.getInstance<SelectNode>();
         if(event.key == 'Shift'){
-            this.shiftState = false;
+            that.shiftState = false;
         }
     }
 
@@ -35,10 +37,11 @@ export class SelectNode extends ContextHolder{
      * @param event 
      * @param node 
      */
-    eventBorderClick(event: MouseEvent, node:VNode){
+    eventGroupClick(event: MouseEvent, node:VNode){
+        
         let foreign: any = event.currentTarget;
         let nodeId = RenderUtil.getIdBySel(foreign.id);
-
+        this.logger.debug("点击设置元素", nodeId);
         let nodeLayer = this.sceneContext.nodeLayer;
 
         if(this.shiftState == false){ //如果没有按住shift，只保留之前的id，其他全干掉
@@ -63,16 +66,30 @@ export class SelectNode extends ContextHolder{
             nodeLayer.selIdSet.add(nodeId);//不然则追加起来
         }
     }
+    
+    /**
+     * 点击背景，取消所有选择
+     * @param event 
+     * @param node 
+     */
+    eventBackgroundClick(event: MouseEvent, node:VNode){
+        let nodeLayer = this.sceneContext.nodeLayer;
+        this.logger.debug("取消选择的元素", nodeLayer.selIdSet);
+        nodeLayer.selIdSet.forEach((id)=>{ //去掉之前的显示状态
+            let textarea: HTMLTextAreaElement = document.getElementById(RenderObject.NodeBorder + id) as HTMLTextAreaElement;
+            if(textarea != undefined){
+                textarea.style.stroke = 'none';
+            }
+        });
+        nodeLayer.selIdSet.clear();
+    }
 
     /**
      * 移入的时候，设置边框可见
      * @param event 
      * @param node 
      */
-    eventBorderEnter(event: MouseEvent, node:VNode){
-        if(this.checkToInner(event)){       //进入时跟内部有关系，
-            return ;
-        }
+    eventGroupEnter(event: MouseEvent, node:VNode){
         let foreign: any = event.currentTarget;
         let nodeId = RenderUtil.getIdBySel(foreign.id);
         this.selectId = nodeId;
@@ -85,10 +102,7 @@ export class SelectNode extends ContextHolder{
      * @param event 
      * @param node 
      */
-    eventBorderLeave(event: MouseEvent, node:VNode){
-        if(this.checkToInner(event)){       //目的是内部，返回
-            return ;
-        }
+    eventGroupLeave(event: MouseEvent, node:VNode){
         let foreign: any = event.currentTarget;
         let nodeId = RenderUtil.getIdBySel(foreign.id);
         if(this.sceneContext.nodeLayer.selIdSet.has(nodeId) == false){
@@ -97,18 +111,6 @@ export class SelectNode extends ContextHolder{
         }
     }
 
-    /**
-     * 只要有目的为SVGForeignObjectElement 则说明这个移动与内部有关系
-     * @param event 
-     */
-    checkToInner(event: MouseEvent):boolean{
-        let src:SVGElement = (event.target|| event.srcElement) as SVGElement;
-        let to:SVGElement = event.relatedTarget as SVGElement;
-        if((src  && src.localName == "foreignObject") || (to && to.localName == "foreignObject")){
-            return true;
-        }
-        return false;
-    }
 
     destory(){
         document.removeEventListener('keydown', this.eventShiftDown)   //shift只有down up事件

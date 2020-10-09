@@ -6,6 +6,7 @@ export enum EventType{
     CreateJsonComplete,
     MindDataSetRootNode,
     Message,
+    Dialog,
 }
 
 var eventEmitter:EventEmitter = new EventEmitter();

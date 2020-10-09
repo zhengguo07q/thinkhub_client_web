@@ -1,6 +1,8 @@
 import { SceneContext } from '../util/Interface';
+import log, { Logger } from 'loglevel';
 
 export abstract class ContextHolder{
+    protected logger:Logger;
     protected static instance:any = null;
     protected sceneContext:SceneContext;
 
@@ -10,6 +12,7 @@ export abstract class ContextHolder{
         }
         var interaction:T = new c()
         interaction.sceneContext = sceneContext;
+        interaction.logger = log.getLogger(c.name);
         interaction.initialize();
         this.instance = interaction;
         return interaction;

@@ -1,5 +1,5 @@
 import {AppHistory} from "../scene/AppHistory";
-import {NodeLayer} from '../layer/NodeLayer';
+import {NodeLayer} from '../scene/NodeLayer';
 import { NodeAttr } from '../item/NodeAttr';
 
 export class Point {

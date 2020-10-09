@@ -4,6 +4,7 @@ import { h } from 'snabbdom/build/package/h';
 import { NodeAttr } from '@/thinkmind/item/NodeAttr';
 import { RenderContext, RenderObject } from './RenderContext';
 import { EventHelper } from '../util/EventHelper';
+import { Color } from '../util/ColorUtil'
 
 /** 
  * 	<g>
@@ -25,9 +26,17 @@ export class NodeRender {
 
         const contentWidth = Math.round(width - 2 * attr.paddingX);
         const contentHeight = Math.round(height - 2 * attr.paddingY);
-
-        return [
-            h("g#" + attr.data.id, { ns: RenderContext.NS_svg, attrs: { transform: 'translate(' + x + ' ' + y + ')' } }, [
+        
+        let nodes = [
+            h("g#" + RenderObject.NodeGroup + attr.data.id, { 
+                ns: RenderContext.NS_svg, 
+                attrs: { transform: 'translate(' + x + ' ' + y + ')' } ,
+                on: {
+                    mousedown: [EventHelper.eventGroupClick, EventHelper.eventGroupDown],
+                    mouseenter: EventHelper.eventGroupEnter,
+                    mouseleave: EventHelper.eventGroupLeave,
+                }
+            }, [
                 h("rect#" + RenderObject.NodeBorder + attr.data.id,
                     {
                         attrs:
@@ -38,6 +47,7 @@ export class NodeRender {
                             height: height + 6,
                             rx: renderContext.backgroundAttr.borderRadiusSelect,
                             ry: renderContext.backgroundAttr.borderRadiusSelect,
+                            class:'nodeBorder',
                         },
                         style: {
                             stroke: 'none',
@@ -55,12 +65,7 @@ export class NodeRender {
                             rx: attr.borderRadius,
                             ry: attr.borderRadius,
                             stroke: attr.borderColor,
-                            fill: attr.background
-                        },
-                        on:{
-                            mouseenter: EventHelper.eventBorderEnter,
-                            mouseleave: EventHelper.eventBorderLeave,
-                            click: EventHelper.eventBorderClick,
+                            fill: attr.background,
                         },
                         ns: RenderContext.NS_svg
                     }),
@@ -73,11 +78,10 @@ export class NodeRender {
                             width: contentWidth,
                             height: contentHeight,
                             stroke: attr.borderColor,
-                            fill: attr.background
+                            fill: attr.background,
                         },
                         on:
                         {
-                            click: EventHelper.eventBorderClick,
                             dblclick: EventHelper.eventForeignDbClick,
                         },
                         ns: RenderContext.NS_svg
@@ -99,6 +103,36 @@ export class NodeRender {
                             },
                         }, attr.data.content)
                 ])])];
+        return nodes;
+    }
+
+    /**
+     * 一些辅助性图形
+     * @param computeNode 
+     */
+    renderExts(computeNode: ComputeNode):VNode[]{
+        const attr: NodeAttr = computeNode.data
+        let exts:VNode[] = [];
+        computeNode.showBBox = true;
+        if(computeNode.showBBox){
+            let bbox = computeNode.getBoundingBox();
+            exts.push(h("rect#" + RenderObject.NodeExt + attr.data.id, {
+                attrs:
+                {
+                    x: bbox.left,
+                    y: bbox.top,
+                    width: bbox.width - bbox.left,
+                    height: bbox.height - bbox.top,
+                },
+                style:{
+                    strokeWidth:'1',
+                    stroke: Color.randomColor(),
+                    fillOpacity:'0',
+                },
+                ns: RenderContext.NS_svg
+            }));
+        }
+        return exts;
     }
 
     /**

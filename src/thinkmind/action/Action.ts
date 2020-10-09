@@ -1,4 +1,4 @@
-import { NodeLayer } from '../layer/NodeLayer'
+import { NodeLayer } from '../scene/NodeLayer'
 import { AppHistory } from '../scene/AppHistory';
 
 export abstract class Action {
