@@ -2068,7 +2068,7 @@
   resolved "https://registry.npm.taobao.org/@types/js-cookie/download/@types/js-cookie-2.2.6.tgz#f1a1cb35aff47bc5cfb05cb0c441ca91e914c26f"
   integrity sha1-8aHLNa/0e8XPsFywxEHKkekUwm8=
 
-"@types/json-schema@^7.0.3", "@types/json-schema@^7.0.4", "@types/json-schema@^7.0.5":
+"@types/json-schema@^7.0.3", "@types/json-schema@^7.0.4", "@types/json-schema@^7.0.5", "@types/json-schema@^7.0.6":
   version "7.0.6"
   resolved "https://registry.npm.taobao.org/@types/json-schema/download/@types/json-schema-7.0.6.tgz?cache=0&sync_timestamp=1598910589248&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fjson-schema%2Fdownload%2F%40types%2Fjson-schema-7.0.6.tgz#f4c7ec43e81b319a9815115031709f26987891f0"
   integrity sha1-9MfsQ+gbMZqYFRFQMXCfJph4kfA=
@@ -2538,6 +2538,16 @@ ajv@^6.1.0, ajv@^6.10.0, ajv@^6.10.2, ajv@^6.12.2, ajv@^6.12.3, ajv@^6.12.4:
   version "6.12.5"
   resolved "https://registry.npm.taobao.org/ajv/download/ajv-6.12.5.tgz?cache=0&sync_timestamp=1600261920612&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fajv%2Fdownload%2Fajv-6.12.5.tgz#19b0e8bae8f476e5ba666300387775fb1a00a4da"
   integrity sha1-GbDouuj0duW6ZmMAOHd1+xoApNo=
+  dependencies:
+    fast-deep-equal "^3.1.1"
+    fast-json-stable-stringify "^2.0.0"
+    json-schema-traverse "^0.4.1"
+    uri-js "^4.2.2"
+
+ajv@^6.12.5:
+  version "6.12.6"
+  resolved "https://registry.npm.taobao.org/ajv/download/ajv-6.12.6.tgz?cache=0&sync_timestamp=1602353833152&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fajv%2Fdownload%2Fajv-6.12.6.tgz#baf5a62e802b07d977034586f8c3baf5adf26df4"
+  integrity sha1-uvWmLoArB9l3A0WG+MO69a3ybfQ=
   dependencies:
     fast-deep-equal "^3.1.1"
     fast-json-stable-stringify "^2.0.0"
@@ -9409,7 +9419,7 @@ mime-db@1.44.0:
   resolved "https://registry.npm.taobao.org/mime-db/download/mime-db-1.45.0.tgz?cache=0&sync_timestamp=1600831145015&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fmime-db%2Fdownload%2Fmime-db-1.45.0.tgz#cceeda21ccd7c3a745eba2decd55d4b73e7879ea"
   integrity sha1-zO7aIczXw6dF66LezVXUtz54eeo=
 
-mime-types@^2.1.12, mime-types@~2.1.17, mime-types@~2.1.19, mime-types@~2.1.24:
+mime-types@^2.1.12, mime-types@^2.1.27, mime-types@~2.1.17, mime-types@~2.1.19, mime-types@~2.1.24:
   version "2.1.27"
   resolved "https://registry.npm.taobao.org/mime-types/download/mime-types-2.1.27.tgz?cache=0&sync_timestamp=1587700357245&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fmime-types%2Fdownload%2Fmime-types-2.1.27.tgz#47949f98e279ea53119f5722e0f34e529bec009f"
   integrity sha1-R5SfmOJ56lMRn1ci4PNOUpvsAJ8=
@@ -12388,6 +12398,15 @@ schema-utils@^2.5.0, schema-utils@^2.6.1, schema-utils@^2.6.5, schema-utils@^2.6
     ajv "^6.12.4"
     ajv-keywords "^3.5.2"
 
+schema-utils@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npm.taobao.org/schema-utils/download/schema-utils-3.0.0.tgz?cache=0&sync_timestamp=1601922425223&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fschema-utils%2Fdownload%2Fschema-utils-3.0.0.tgz#67502f6aa2b66a2d4032b4279a2944978a0913ef"
+  integrity sha1-Z1AvaqK2ai1AMrQnmilEl4oJE+8=
+  dependencies:
+    "@types/json-schema" "^7.0.6"
+    ajv "^6.12.5"
+    ajv-keywords "^3.5.2"
+
 screenfull@^5.0.0:
   version "5.0.2"
   resolved "https://registry.npm.taobao.org/screenfull/download/screenfull-5.0.2.tgz#b9acdcf1ec676a948674df5cd0ff66b902b0bed7"
@@ -14167,6 +14186,15 @@ url-loader@^2.1.0:
     loader-utils "^1.2.3"
     mime "^2.4.4"
     schema-utils "^2.5.0"
+
+url-loader@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.npm.taobao.org/url-loader/download/url-loader-4.1.1.tgz?cache=0&sync_timestamp=1602252665628&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Furl-loader%2Fdownload%2Furl-loader-4.1.1.tgz#28505e905cae158cf07c92ca622d7f237e70a4e2"
+  integrity sha1-KFBekFyuFYzwfJLKYi1/I35wpOI=
+  dependencies:
+    loader-utils "^2.0.0"
+    mime-types "^2.1.27"
+    schema-utils "^3.0.0"
 
 url-parse@^1.4.3, url-parse@^1.4.7:
   version "1.4.7"

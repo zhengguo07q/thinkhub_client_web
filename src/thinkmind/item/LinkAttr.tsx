@@ -7,6 +7,7 @@ export class LinkAttr{
     lineWidth: number = 1;                 //行宽
     lineColor: string ='#ffffff';         //行颜色
     lineRadius: number = 1;                //行角半径
+    collapsedOffset:number = 0;
 
     static fromTheme(object:any):LinkAttr{
         let attr = new LinkAttr();

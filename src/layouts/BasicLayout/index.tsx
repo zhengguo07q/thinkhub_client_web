@@ -51,24 +51,25 @@ export default function BasicLayout({ children, }: { children: React.ReactNode; 
     };
 
     const [device, setDevice] = useState(getDevice(NaN));
+    const [height, setHeight] = useState(window.innerHeight);
     const [userState] = store.useModel('user');
+
+
 
     if (typeof window !== 'undefined') {
         window.addEventListener('optimizedResize', e => {
             const deviceWidth =
                 (e && e.target && (e.target as Window).innerWidth) || NaN;
             setDevice(getDevice(deviceWidth));
+            const deviceHeight =
+            (e && e.target && (e.target as Window).innerHeight) || NaN;
+            setHeight(deviceHeight);
         });
     }
 
     return (
         <ConfigProvider device={device}>
-            <Shell
-                type="brand"
-                style={{
-                    minHeight: '100vh',
-                }}
-            >
+            <Shell type="brand">
                 <Shell.Branding>
                     <Header></Header>
 
@@ -79,17 +80,17 @@ export default function BasicLayout({ children, }: { children: React.ReactNode; 
                         marginRight: 10,
                     }}
                 />
-                {userState.isLogin ? 
-                <Shell.Action >
-                    <Notice />
-                    <HeaderAvatar />
-                </Shell.Action> :
-                <Shell.Action >
-                    <RegisterAvatar/>
-                </Shell.Action>}
+                {userState.isLogin ?
+                    <Shell.Action >
+                        <Notice />
+                        <HeaderAvatar />
+                    </Shell.Action> :
+                    <Shell.Action >
+                        <RegisterAvatar />
+                    </Shell.Action>}
 
 
-                <Shell.Content style={{ padding: '0px' }}>{children}</Shell.Content>
+                <Shell.Content style={{ padding: '0px'}}>{children}</Shell.Content>
 
                 <Shell.Footer>
                     <Footer />

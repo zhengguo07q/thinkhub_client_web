@@ -1,11 +1,21 @@
 export type LinkLineType = 'line' | 'curve' | 'round';
-import ThemeDefault from './ThemeDefault';
+
+export enum LinkPositionType {
+    center,         //正中心
+    axisCenter,     //坐标轴中心
+    baseLine,       //基线
+}
+
+export enum BackgroundModelType{
+    backgroundBorder,       //背景边框模式
+    baseLine,               //基线模式
+}
 
 //定义了主题的类型，里面包含内容的样式，主题的样式，链接的样式等
 //链接样式表定义
 export type LinkStyle = {
     lineType?: string;                  //行类型
-    
+    collapsedOffset:number;             //折叠偏移
     hasUnderline?: boolean;             //是否有下划线
     lineWidth?: number;                 //行宽
     lineColor?: string;                 //行颜色
@@ -40,6 +50,10 @@ export type TopicContentStyle = {     //主题内容央视定义
     lineHeight?: string;                //行高
 
     content: string;
+
+    linkPos:LinkPositionType;           //链接位置
+    backgroundType:BackgroundModelType; //背景边框模式
+    showCollapsed:boolean;              //显示折叠
 };
 
 export type TopicStyle = {            //主题样式
@@ -47,11 +61,18 @@ export type TopicStyle = {            //主题样式
     linkStyle: LinkStyle;              //链接样式
 };
 
-export type ThemeType = {             //主题类型
-    name: string;                       //名字
+//主题描述
+export type ThemeDesc = {
+    id:string;
+    name:string;
+    img:string;
+}
+
+export type ThemeType = {               //主题类型
+    themeDesc:ThemeDesc;
     background: string;                 //背景色
     highlightColor: string;             //行高颜色
-    randomColor?: boolean;              //随机颜色
+    hoverColor: string;                 //随机颜色
     marginH: number;                    //边距水平
     marginV: number;                    //边距垂直
     borderWidthSelect:string;           //选择边框

@@ -46,9 +46,10 @@ export class NodeAlgoAttr extends NodeAlgoAttrBase {
 
     getChildren(d:NodeAttr){
         var nodes: NodeAttr[] = [];
+        let items = SceneScreen.context.nodeLayer.items;
         for(var i=0;i<d.data.childs.length; i++){
             var id = d.data.childs[i];
-            var node = SceneScreen.context.nodeLayer.items.get(id);
+            let node = items.get(id);
             if(node == undefined){
                 continue;
             }

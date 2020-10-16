@@ -32,7 +32,7 @@ const MenuBar = ()=>{
                 <Menu.Item key="rightPanel">右边</Menu.Item>
                 <Menu.Item key="setRootNode" onClick={setRootNode}>设置根</Menu.Item>
             </Menu>
-            <Range className={styles.nodeLevelRange} min={1} max={5} defaultValue={DataCache.depth} onChange={onRangeChage} hasTip={false} marks={[1,5]} ></Range>
+            <Range className={styles.nodeLevelRange} min={1} max={6} defaultValue={DataCache.depth} onChange={onRangeChage} hasTip={false} marks={[1,6]} ></Range>
             </Box>
         </div>);
 }

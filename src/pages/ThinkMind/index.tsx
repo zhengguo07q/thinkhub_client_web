@@ -7,7 +7,6 @@ import PropertyCanvas from './components/PropertyCanvas';
 import PropertyStyle from './components/PropertyStyle';
 import { store as pageStore } from 'ice/ThinkMind';
 import styles from './index.module.scss';
-import { EventManager, EventType } from '@/thinkmind/util/Event';
 import NodeSelectCrumb from './components/NodeSelectCrumb';
 
 const { Cell } = ResponsiveGrid;
@@ -84,7 +83,7 @@ const Dashboard = () => {
   }
 
   return (
-    <ResponsiveGrid gap={[0, 5]}>
+    <ResponsiveGrid gap={[0, 5]} className={styles.propertyContainer}>
     <Cell colSpan={12}>
       <MenuBar/>
     </Cell> 

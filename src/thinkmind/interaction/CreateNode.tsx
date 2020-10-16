@@ -9,11 +9,13 @@ import { RenderManager } from '../render/RenderManager';
  */
 export class CreateNode extends ContextHolder {
     initialize() {
-        Mousetrap.bind("tab", this.eventKeyTab.bind(this))
+        Mousetrap.bind("tab", this.eventKeyTab)
     }
 
     eventKeyTab(event: ExtendedKeyboardEvent, combo: string) {
-        let nodeLayer = this.sceneContext.nodeLayer;
+        event.preventDefault();
+        let that = CreateNode.getInstance<CreateNode>();
+        let nodeLayer = that.sceneContext.nodeLayer;
         if (nodeLayer.selIdSet.size == 0) {
             return;
         }
@@ -23,16 +25,16 @@ export class CreateNode extends ContextHolder {
             let newData: MindData = createNewNode('') as MindData;
             let cAttr = pAttr.addNodeAttrChild(newData);
             nodeLayer.items.set(cAttr.data.id, cAttr);       //添加attr缓存
+            that.logger.debug("创建元素", cAttr.data.id, cAttr.data.content);
         });
 
         LayoutManager.getInstance().markChange();
         
-        let rootComputeNode = LayoutManager.getInstance().layout();
-        RenderManager.fastRender(rootComputeNode, nodeLayer.backgroundAttr);
+        LayoutManager.getInstance().layout(true);
     }
 
 
     destory() {
-        //   this.sceneContext.rootElement.removeEventListener("click", this.listener)
+        Mousetrap.unbind("tab", this.eventKeyTab.bind(this))
     }
 }

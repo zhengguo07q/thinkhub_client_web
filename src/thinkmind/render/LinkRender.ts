@@ -3,45 +3,46 @@ import { VNode } from 'snabbdom/build/package/vnode';
 import { h } from 'snabbdom/build/package/h';
 import { NodeAttr } from '@/thinkmind/item/NodeAttr';
 import { LinkAttr } from '@/thinkmind/item/LinkAttr';
-import { RenderContext } from './RenderContext';
+import { RenderContext,RenderObject } from './RenderContext';
+import { EventHelper } from '../util/EventHelper';
 
 export class LinkRender  {
-    render(renderContext:RenderContext, rootNode: ComputeNode, childNode: ComputeNode, isHorizontal:boolean, scale:number=1): VNode[] {
+    render(renderContext:RenderContext, rootNode: ComputeNode, childNode: ComputeNode, isHorizontal:boolean, scale:number=1): VNode{
         let attrNode: NodeAttr = rootNode.data;
         let linkAttr: LinkAttr = attrNode.linkAttr;
-        let beginNode = rootNode
-        let endNode = childNode
-        let beginX
-        let beginY
-        let endX
-        let endY
-        if (isHorizontal) {
-            let beginNode = rootNode
-            if (rootNode.x > childNode.x) {
-                beginNode = childNode
-                endNode = rootNode
+
+        let beginNode:ComputeNode = rootNode;
+        let endNode:ComputeNode = childNode;
+        let beginX:number, beginY:number;
+        let endX:number, endY:number;
+
+        if (isHorizontal) {                     //水平
+            if (rootNode.x > childNode.x) {     //根在右边， 交换位置
+                beginNode = childNode;
+                endNode = rootNode;
             }
-            beginX = Math.round(beginNode.x + beginNode.width - beginNode.hgap)
-            beginY = Math.round(beginNode.y + beginNode.height / 2)
-            endX = Math.round(endNode.x + endNode.hgap)
-            endY = Math.round(endNode.y + endNode.height / 2)
-        } else {
-            if (rootNode.y > childNode.y) {
-                beginNode = childNode
-                endNode = rootNode
+            beginX = Math.round(beginNode.x + beginNode.width - beginNode.hgap);
+            beginY = Math.round(beginNode.y + beginNode.height / 2);
+            endX = Math.round(endNode.x + endNode.hgap);
+            endY = Math.round(endNode.y + endNode.height / 2);
+        } else {                                //垂直
+            if (rootNode.y > childNode.y) {     //根在下面，交换位置
+                beginNode = childNode;
+                endNode = rootNode;
             }
-            beginX = Math.round(beginNode.x + beginNode.width / 2)
-            beginY = Math.round(beginNode.y + beginNode.height - beginNode.vgap)
-            endX = Math.round(endNode.x + endNode.width / 2)
-            endY = Math.round(endNode.y + endNode.vgap)
+            beginX = Math.round(beginNode.x + beginNode.width / 2);
+            beginY = Math.round(beginNode.y + beginNode.height - beginNode.vgap);
+            endX = Math.round(endNode.x + endNode.width / 2);
+            endY = Math.round(endNode.y + endNode.vgap);
         }
+        //是根节点，则连接点在中间
         if (beginNode.isRoot()) {
-            beginX = Math.round(beginNode.x + beginNode.width / 2)
-            beginY = Math.round(beginNode.y + beginNode.height / 2)
+            beginX = Math.round(beginNode.x + beginNode.width / 2);
+            beginY = Math.round(beginNode.y + beginNode.height / 2);
         }
         if (endNode.isRoot()) {
-            endX = Math.round(endNode.x + endNode.width / 2)
-            endY = Math.round(endNode.y + endNode.height / 2)
+            endX = Math.round(endNode.x + endNode.width / 2);
+            endY = Math.round(endNode.y + endNode.height / 2);
         }
  
         const getBezierCurveVorH = (isHorizontal: boolean): string => {
@@ -69,18 +70,43 @@ export class LinkRender  {
                 (endY / scale);
             }
         }
-        
-        return [h("path",
+
+        return h("path#"+ RenderObject.NodeLine + attrNode.data.id,
             {
                 ns: RenderContext.NS_svg,
                 attrs:
                 {
                     stroke: linkAttr.lineColor,
-                    strokeWidth: 10,
+                    strokeWidth: linkAttr.lineWidth,
                     strokeLinecap: 'round',
                     fill: 'none',
                     d: getBezierCurveVorH(isHorizontal)
-                }
-            })];
+                },
+                
+            });
+    }
+
+    /**
+     * 把链接和折叠按钮合并组，用于触发事件
+     * @param list 
+     */
+    wrapperGroupLinkAndCollapsed(node:ComputeNode, list:VNode[]){
+        let attr:NodeAttr = node.data;
+        if(attr.isCollapsed){
+            return h("g#" + RenderObject.NodeGroupLinkAndCollapsed + node.id, {
+                ns:RenderContext.NS_svg,
+                style:{pointerEvents:"bounding-box",},  //边界盒触发事件
+            }, list);
+        }else{
+            return h("g#" + RenderObject.NodeGroupLinkAndCollapsed + node.id, {
+                ns:RenderContext.NS_svg,
+                on:{
+                    mouseenter: EventHelper.eventLineEnter,
+                    mouseleave: EventHelper.eventLineLeave,
+                },
+                style:{pointerEvents:"bounding-box",},  //边界盒触发事件
+            }, list);
+        }
+
     }
 }

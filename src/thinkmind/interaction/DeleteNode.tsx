@@ -39,8 +39,7 @@ export class DeleteNode extends ContextHolder{
         LayoutManager.getInstance().markChange();
         nodeLayer.selIdSet.clear();
         
-        let rootComputeNode = LayoutManager.getInstance().layout();
-        RenderManager.fastRender(rootComputeNode, nodeLayer.backgroundAttr);
+        LayoutManager.getInstance().layout(true);
     }
 
     deleteCallback(){

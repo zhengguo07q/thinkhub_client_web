@@ -1,14 +1,11 @@
-import { ThemeUtil } from '../config/ThemeUtil';
+import { ThemeManagerInstance } from '../config/ThemeManager';
 import { NodeAttr } from '../item/NodeAttr';
 import { ContextHolder } from '../util/ContextHolder';
 import { MindData } from '../dataSource/MindData';
-import LoadAction from '../action/LoadAction';
-import { ComputeNode } from '../item/ComputeNode';
-import { RenderManager } from '../render/RenderManager';
 import { NodeAlgoAttr } from '../item/NodeAlgoAttr';
 import { LinkAttr } from '../item/LinkAttr';
 import { EventManager, EventType } from '../util/Event';
-import { LayoutManager, LayoutType } from '../layout/LayoutManager';
+import { LayoutManager } from '../layout/LayoutManager';
 import { BackgroundAttr } from '../item/BackgoundAttr';
 
 /**
@@ -30,7 +27,7 @@ export class JsonCreate extends ContextHolder{
         var attrNode:NodeAttr = this.createSubNode(rootId, tree, depth++);
         nodeLayer.rootItem = attrNode;
 
-        nodeLayer.backgroundAttr = BackgroundAttr.fromJs(ThemeUtil.getTheme());
+        nodeLayer.backgroundAttr = BackgroundAttr.fromJs(ThemeManagerInstance.getTheme());
         nodeLayer.backgroundAttr.setElement(this.sceneContext.rootElement);
         this.render();
         EventManager.dispatcher(EventType.CreateJsonComplete);
@@ -41,11 +38,8 @@ export class JsonCreate extends ContextHolder{
      //   this.sceneContext.appHistory.apply(new LoadAction(this.sceneContext.nodeLayer));
         let nodeLayer = this.sceneContext.nodeLayer;
         LayoutManager.getInstance().set(nodeLayer.rootItem, NodeAlgoAttr.build(), nodeLayer.backgroundAttr);
-        LayoutManager.getInstance().setLayoutType(LayoutType.RightLogical);
         LayoutManager.getInstance().markChange();
-        var rootComputeNode:ComputeNode = LayoutManager.getInstance().layout();
-       // console.log("rootComputeNode", rootComputeNode);
-       RenderManager.fastRender(rootComputeNode, nodeLayer.backgroundAttr);
+        LayoutManager.getInstance().layout();
     }
 
     /**
@@ -56,7 +50,7 @@ export class JsonCreate extends ContextHolder{
      */
     createSubNode(rootId:string, treeMap:Map<string, MindData>, depth:number): NodeAttr{
         //创建属性对象
-        let topic = ThemeUtil.getTopicStyle(depth);
+        let topic = ThemeManagerInstance.getTopicStyle(depth);
         let item:NodeAttr = NodeAttr.fromTheme(topic.contentStyle);
         let md = treeMap.get(rootId)!;
 

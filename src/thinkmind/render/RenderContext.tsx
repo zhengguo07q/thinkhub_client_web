@@ -24,7 +24,17 @@ export const RenderObject = {
     NodeBorder: "nb_",
     NodeForeignObject: "nf_",
     NodeTextarea: "nt_",
+    NodeCollapsed:"nc_",
+    NodeLine:"nl_",
+    NodeGroupLinkAndCollapsed:"nlc_",
     NodeExt:"ex_",
+}
+
+export enum RenderOrientation{
+    LEFT,
+    TOP,
+    RIGHT,
+    BOTTOM,
 }
 
 /**
@@ -56,6 +66,32 @@ export class RenderContext{
             eventListenersModule, // attaches event listeners
           ])
         this.vnodeRoot = this.patch(this.rootElement, toVNode(this.rootElement));
+    }
+
+    /**
+     * 计算子节点的方向，方向是可以继承的，主要是为了在子节点隐藏时，知道方向
+     * @param parentNode 
+     * @param childNode 
+     */
+    calculateChildOrientation(parentNode:ComputeNode, childNode:ComputeNode, isHorizontal:boolean):RenderOrientation{
+        let retOrientation;
+        let beginNode = parentNode;
+        let endNode = childNode;
+        //算出位置方向
+        if (isHorizontal) {                     //水平
+            if (beginNode.x > endNode.x) {      //根在右边， 交换位置
+                retOrientation = RenderOrientation.LEFT;
+            }else{
+                retOrientation = RenderOrientation.RIGHT;
+            }
+        } else {                               //垂直
+            if (beginNode.y > endNode.y) {     //根在下面，交换位置
+                retOrientation = RenderOrientation.TOP;
+            }else{
+                retOrientation = RenderOrientation.BOTTOM;
+            }
+        }
+        return retOrientation;
     }
 
     /**
@@ -103,6 +139,10 @@ export class RenderContext{
         })])];
 
         this.renderCache.container = rootNode;
+    }
+
+    wrapperGroup(list:VNode[]){
+        return h("g", {ns: RenderContext.NS_svg,}, list);
     }
 
     /**

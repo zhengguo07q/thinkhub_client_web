@@ -1,14 +1,17 @@
-import { ThemeUtil } from '../config/ThemeUtil';
+import { ThemeManagerInstance } from '../config/ThemeManager';
 import { SceneScreen } from '../scene/SceneScreen';
 import { LinkAttr } from './LinkAttr';
 import DataCache from '../dataSource/DataCache';
 import { createNewNode, MindData } from '../dataSource/MindData';
 import { TypeUtil } from '../util/TypeUtil';
+import { ThemeType, TopicStyle } from '../config/Theme';
+import log, {Logger} from 'loglevel';
 
 /**
  * 属性指代的是可被人直接操控的属性
  */
 export class NodeAttr{
+    static logger:Logger = log.getLogger("NodeAttr");
     static dragNode:NodeAttr|undefined;               //拖拽节点，如果之前有，需要删除
 
     data:MindData;
@@ -40,6 +43,7 @@ export class NodeAttr{
     fontWeight: string = '';                     //粗体
 
     themeLevel: number = 3;                  //主题类型级别
+    isTemp:boolean = false;                 //是否为临时节点
 
     linkAttr: LinkAttr;     //链接属性
 
@@ -74,8 +78,8 @@ export class NodeAttr{
      * 根据父节点创建子节点
      * @param pAttr 
      */
-    createNodeAttr(newData:MindData) :NodeAttr{
-        let topic = ThemeUtil.getSubTopicStyle(this.themeLevel);
+    createNodeAttr(newData:MindData, topic?:TopicStyle) :NodeAttr{
+        topic = topic || ThemeManagerInstance.getSubTopicStyle(this.themeLevel);
         let item: NodeAttr = NodeAttr.fromTheme(topic.contentStyle);
         newData.content = topic.contentStyle.content;
         item.data = newData;
@@ -88,18 +92,38 @@ export class NodeAttr{
      * @param refItems 
      */
     addNodeAttrDrag(refItems: Map<string, NodeAttr>, pos:number){
-        if(NodeAttr.dragNode != undefined){
+        if(NodeAttr.dragNode != undefined && NodeAttr.dragNode.data.id != this.data.id){        //不是子对象，需要销毁重新构建
             let dragData = NodeAttr.dragNode.data;
-            let pNode = refItems.get(dragData.pid)!;
+            let pNode = refItems.get(dragData.pid)!;                    //获得父节点
+            NodeAttr.logger.debug("删除之前的", pNode.data.childs, dragData.id);
             TypeUtil.arrayRemove(pNode.data.childs, dragData.id);       //从父中删除
-            refItems.delete(NodeAttr.dragNode.data.id);
+            refItems.delete(NodeAttr.dragNode.data.id);                 //删除之前的 
+            NodeAttr.logger.debug("删除之前的", pNode.data.childs, dragData.id);       
             NodeAttr.dragNode = undefined;
         }
-        let newData: MindData = createNewNode('') as MindData;
-        NodeAttr.dragNode = this.createNodeAttr(newData);
-        this.data.childs.push(NodeAttr.dragNode.data.id);               //插入位置
+        let newData: MindData = createNewNode('得到') as MindData;
+        let topic = ThemeManagerInstance.getTheme().aloneTopic;
+        NodeAttr.dragNode = this.createNodeAttr(newData, topic);
+        NodeAttr.dragNode.isTemp = true;
+        TypeUtil.arrayInsert(this.data.childs, pos, NodeAttr.dragNode.data.id); //插入到父特定位置
         NodeAttr.dragNode.data.pid = this.data.id;
-        refItems.set(NodeAttr.dragNode.data.pid, NodeAttr.dragNode);
+        refItems.set(NodeAttr.dragNode.data.id, NodeAttr.dragNode);
+    }
+
+    /**
+     * 删除拖拽节点
+     * @param refItems 
+     */
+    static deleteNodeAttrDrag(refItems: Map<string, NodeAttr>){
+        if(NodeAttr.dragNode != undefined ){        //不是子对象，需要销毁重新构建
+            let dragData = NodeAttr.dragNode.data;
+            let pNode = refItems.get(dragData.pid)!;                    //获得父节点
+            this.logger.debug("删除之前的", pNode.data.childs, dragData.id);
+            TypeUtil.arrayRemove(pNode.data.childs, dragData.id);       //从父中删除
+            refItems.delete(NodeAttr.dragNode.data.id);                 //删除之前的 
+            this.logger.debug("删除之前的", pNode.data.childs, dragData.id);       
+            NodeAttr.dragNode = undefined;
+        }
     }
 
     /**
@@ -143,6 +167,30 @@ export class NodeAttr{
         DataCache.updateNode(this.data);
     }
 
+    /**
+     * 更新主题
+     */
+    updateTheme(){
+        let style = ThemeManagerInstance.getTopicStyle(this.themeLevel);
+
+        Object.assign(this, style.contentStyle);
+        Object.assign(this.linkAttr, style.linkStyle);
+    }
+
+    /**
+     * 交换父节点
+     * @param refItems 
+     * @param newParent 
+     * @param pos 
+     */
+    exchangeNodeAttr(refItems: Map<string, NodeAttr>, newParent:NodeAttr, pos:number){
+        let oldParent = refItems.get(this.data.pid)!;
+        TypeUtil.arrayRemove(oldParent.data.childs, this.data.id);  //把原来的父引用删除
+        this.data.pid = newParent.data.id;
+        TypeUtil.arrayInsert(newParent.data.childs, pos, this.data.id); //把新的引用插入到特定位置
+
+        DataCache.exchangeNode(newParent.data.id, this.data.id, pos);
+    }
 
     /**
      * 得到含有隐藏节点的列表

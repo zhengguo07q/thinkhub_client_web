@@ -1,9 +1,9 @@
 import { BaseLayout } from './BaseLayout';
 import { nonLayeredTidyTreeAlgorithms } from '../algorithms/NonLayeredTidyTreeAlgorithms';
 
-export class DownwardOrganizationalLayout extends BaseLayout {
+export class RightLayout extends BaseLayout {
   doLayout () {
-    return nonLayeredTidyTreeAlgorithms(this.root, false);
+    return nonLayeredTidyTreeAlgorithms(this.root, true);
   }
 }
 

@@ -1,10 +1,10 @@
 import { BaseLayout } from './BaseLayout';
 import { nonLayeredTidyTreeAlgorithms } from '../algorithms/NonLayeredTidyTreeAlgorithms';
 
-export class UpwardOrganizationalLayout extends BaseLayout {
+export class LeftLayout extends BaseLayout {
   doLayout () {
-    nonLayeredTidyTreeAlgorithms(this.root, false);
-    this.root.down2up();
+    nonLayeredTidyTreeAlgorithms(this.root, true);
+    this.root.right2left();
     return this.root;
   }
 }

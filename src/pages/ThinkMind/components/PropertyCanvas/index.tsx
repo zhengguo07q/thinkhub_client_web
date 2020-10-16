@@ -1,35 +1,71 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.scss';
-import Img from '@icedesign/img';
-import { Box, Button, Checkbox, Divider, Icon } from '@alifd/next';
+import { Box, Button, Balloon, Divider, Icon, MenuButton, List ,VirtualList, Collapse} from '@alifd/next';
+import { LayoutManager, LayoutType } from '@/thinkmind/layout/LayoutManager';
+import { ChromePicker } from 'react-color'
+import ThemeList from './components/ThemeList';
 
-const PropertyCanvas = ()=>{
-    const [imageUrl, setStateImageUrl] = useState("https://img.alicdn.com/tfs/TB1vyxuwHrpK1RjSZTEXXcWAVXa-1350-900.jpg");
+const Item = MenuButton.Item;
 
+const PropertyCanvas = () => {
+    const [layoutState, setLayoutState] = useState({ key: "Standard", label: "Standard" });
+    const [colorState, setColorState] = useState({value:"#ffffff"});
+
+
+    const onLayoutItemSelectClick = (key: string, item: any) => {
+        setLayoutState({ key: key, label: item.props.title });
+        LayoutManager.getInstance().setLayoutType(LayoutType[key]);
+        LayoutManager.getInstance().layout();
+    }
+
+    const selectItemList = [
+        { key: 'Standard', label: 'Standard' },
+        { key: 'Right', label: 'Right' },
+        { key: 'Left', label: 'Left' },
+        { key: 'Upward', label: 'Upward' },
+        { key: 'Downward', label: 'Downward' },
+    ];
+
+    /**
+     * 得到选择的项
+     */
+    const getSelectItem = () => {
+        return selectItemList.map((item) => {
+            return <Item key={item.key}>{item.label}</Item>
+        });
+    }
+
+
+    /**
+     * 改变背景颜色
+     * @param color 
+     */
+    const changeBackgroundColor = (color)=>{
+        setColorState({value:color.hex});
+        LayoutManager.getInstance().backgroundAttr.background = colorState.value;
+        LayoutManager.getInstance().layout(true);
+    }
 
     return (<div className={styles.container}>
         <Box direction='column'>
-            <Box direction='column' align='center' >  
-                <Img
-            enableAliCDNSuffix={true}
-            width={200}
-            height={100}
-            src={imageUrl}
-            type="cover"
-            style={{border: '1px solid #ccc', margin: '10px', borderRadius: '5px'}}
-            />
-            <Button>所有风格</Button>
+            <ThemeList/>
+            <Divider /> 
+            <Box direction='row' justify='space-between' margin={[3, 18]} align='baseline'>
+                <div>背景</div>
+                    <Balloon closable={false}  popupClassName={styles.colorBalloon} trigger={<Button style={{backgroundColor: colorState.value}}></Button>} align="lt" alignEdge triggerType="click">
+                    <ChromePicker onChangeComplete={changeBackgroundColor}/>
+                </Balloon>
             </Box>
-            <Divider/>
-            <Box direction='row'>
-                <Checkbox checked>背景颜色</Checkbox>
-                <Button></Button>
+
+
+            <Box direction='row' justify='space-between' margin={[3, 18]} align='baseline'>
+                <div >布局</div>
+                <MenuButton type="primary" label={layoutState.label} defaultSelectedKeys={[layoutState.key]} selectMode='single' onItemClick={onLayoutItemSelectClick}>
+                    {getSelectItem()}
+                </MenuButton>
             </Box>
-            <Divider/>
-            <Box direction='row'>
-                <Checkbox checked>结构</Checkbox>
-                <Button><Icon type="siweidaotu2"></Icon></Button>
-            </Box>
+            <Divider />
+            
         </Box>
     </div>);;
 }

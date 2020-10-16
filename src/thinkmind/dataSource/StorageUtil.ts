@@ -11,7 +11,6 @@ class StorageUtil {
     databaseName = "thinkhub";
     tableName = "mindnode";
     keyId = "id";
-    mindDataName = "mindroot";
     version = 1;
     db:IDBDatabase;
 

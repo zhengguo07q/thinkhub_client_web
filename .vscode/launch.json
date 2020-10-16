@@ -1,15 +1,25 @@
+// See https://github.com/ice-lab/iceworks/blob/master/extensions/iceworks-app/docs/debug.md 
+// for the documentation about the Iceworks debug 
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "url": "http://localhost:3333",
-            "webRoot": "${workspaceFolder}"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:3333",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Iceworks Debug",
+      "url": "http://localhost:3333",
+      "urlFilter": "http://localhost:3333/**/*",
+      "webRoot": "${workspaceFolder}",
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-user-data",
+      "preLaunchTask": "Iceworks Start Background Tasks",
+      "postDebugTask": "Iceworks Stop Background Tasks"
+    }
+  ]
 }

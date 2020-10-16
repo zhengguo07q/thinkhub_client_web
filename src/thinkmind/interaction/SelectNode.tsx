@@ -1,13 +1,12 @@
 import { VNode } from 'snabbdom/build/package/vnode';
 import { RenderUtil } from '../render/RenderUtil';
 import { ContextHolder } from '../util/ContextHolder';
-import { RenderContext, RenderObject } from '../render/RenderContext';
-//import Mousetrap from 'mousetrap'
+import { RenderObject } from '../render/RenderContext';
+import { LayoutManagerInstance } from '../layout/LayoutManager';
 
 
 export class SelectNode extends ContextHolder{
     shiftState:boolean = false;
-    selectId:string = '';
 
     initialize(){
         this.shiftState = false;
@@ -65,6 +64,8 @@ export class SelectNode extends ContextHolder{
         }else{
             nodeLayer.selIdSet.add(nodeId);//不然则追加起来
         }
+        let borderElement: HTMLElement = document.getElementById(RenderObject.NodeBorder + nodeId) as HTMLElement;
+        borderElement.style.stroke = this.sceneContext.nodeLayer.backgroundAttr.highlightColor;  //设置边框颜色
     }
     
     /**
@@ -76,9 +77,9 @@ export class SelectNode extends ContextHolder{
         let nodeLayer = this.sceneContext.nodeLayer;
         this.logger.debug("取消选择的元素", nodeLayer.selIdSet);
         nodeLayer.selIdSet.forEach((id)=>{ //去掉之前的显示状态
-            let textarea: HTMLTextAreaElement = document.getElementById(RenderObject.NodeBorder + id) as HTMLTextAreaElement;
-            if(textarea != undefined){
-                textarea.style.stroke = 'none';
+            let borderElement: HTMLElement = document.getElementById(RenderObject.NodeBorder + id) as HTMLElement;
+            if(borderElement != undefined){
+                borderElement.style.stroke = 'none';
             }
         });
         nodeLayer.selIdSet.clear();
@@ -92,9 +93,13 @@ export class SelectNode extends ContextHolder{
     eventGroupEnter(event: MouseEvent, node:VNode){
         let foreign: any = event.currentTarget;
         let nodeId = RenderUtil.getIdBySel(foreign.id);
-        this.selectId = nodeId;
-        let textarea: HTMLTextAreaElement = document.getElementById(RenderObject.NodeBorder + nodeId) as HTMLTextAreaElement;
-        textarea.style.stroke = this.sceneContext.nodeLayer.backgroundAttr.highlightColor;  //设置边框颜色
+
+        let nodeLayer = this.sceneContext.nodeLayer;
+        if(nodeLayer.selIdSet.has(nodeId)){ //被选择，不改变边框
+            return;
+        }
+        let borderElement: HTMLElement = document.getElementById(RenderObject.NodeBorder + nodeId) as HTMLElement;
+        borderElement.style.stroke = this.sceneContext.nodeLayer.backgroundAttr.hoverColor;  //设置边框颜色
     }
 
     /**
@@ -111,6 +116,61 @@ export class SelectNode extends ContextHolder{
         }
     }
 
+    /**
+     * 移入线条，显示节点
+     * @param event 
+     * @param node 
+     */
+    eventLineEnter(event: MouseEvent, node:VNode){
+        let foreign: any = event.currentTarget;
+        let nodeId = RenderUtil.getIdBySel(foreign.id);
+        let collapsedElement: HTMLElement = document.getElementById(RenderObject.NodeCollapsed + nodeId)!;
+        if(collapsedElement != undefined){
+            collapsedElement.style.visibility = 'visible';
+        }
+    }
+
+    /**
+     * 移出线条，隐藏数据节点
+     * @param event 
+     * @param node 
+     */
+    eventLineLeave(event: MouseEvent, node:VNode){
+        let foreign: any = event.currentTarget;
+        let nodeId = RenderUtil.getIdBySel(foreign.id);
+        let collapsedElement: HTMLElement = document.getElementById(RenderObject.NodeCollapsed + nodeId)!;
+        if(collapsedElement != undefined){
+            collapsedElement.style.visibility = 'hidden';
+        }
+    }
+
+    /**
+     * 点击折叠区域， 设置折叠，重绘
+     * @param event 
+     * @param node 
+     */
+    eventCollapsedClickClose(event: MouseEvent, node:VNode){
+        let foreign: any = event.currentTarget;
+        let nodeId = RenderUtil.getIdBySel(foreign.id);
+        let nodeLayer = this.sceneContext.nodeLayer;
+        let attrNode = nodeLayer.items.get(nodeId)!;
+        this.logger.debug("折叠", attrNode.data.content);
+        attrNode.isCollapsed = true;            //设置折叠
+        LayoutManagerInstance.markChange();
+        LayoutManagerInstance.layout(true);
+    }
+
+
+    eventCollapsedClickOpen(event: MouseEvent, node:VNode){
+        let foreign: any = event.currentTarget;
+        let nodeId = RenderUtil.getIdBySel(foreign.id);
+        let nodeLayer = this.sceneContext.nodeLayer;
+        let attrNode = nodeLayer.items.get(nodeId)!;
+        this.logger.debug("展开", attrNode.data.content);
+        attrNode.isCollapsed = false;            //设置折叠
+        LayoutManagerInstance.markChange();
+        LayoutManagerInstance.layout(true);
+    }
 
     destory(){
         document.removeEventListener('keydown', this.eventShiftDown)   //shift只有down up事件

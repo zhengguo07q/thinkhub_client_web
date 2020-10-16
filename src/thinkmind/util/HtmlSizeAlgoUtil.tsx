@@ -73,7 +73,7 @@ class HtmlSizeAlgoUtil{
         if(content.length == 0){  //内容被删除后，
             content = "l";
         }
-        this.adjustmentPrep(this.hiddenTextInput!, content);
+        this.adjustmentPrep(this.hiddenTextInput!, content, attr);
 
         let width = this.hiddenTextInput!.clientWidth! + attr.paddingX * 2;     //需要添加padding
         let height = this.hiddenTextInput!.scrollHeight! + attr.paddingY * 2;
@@ -85,7 +85,7 @@ class HtmlSizeAlgoUtil{
      * 执行预计算
      * @param textInput 
      */
-    adjustmentPrep(textInput:HTMLElement, content:string){
+    adjustmentPrep(textInput:HTMLElement, content:string, attr:NodeAttr){
         if(content.length > 20){
             this.logger.debug(content);
         }
@@ -97,7 +97,11 @@ class HtmlSizeAlgoUtil{
             textInput.style.width = this.maxTextWidth + 'px';
         }
         textInput.innerHTML = content;
-        textInput.style.height = textInput.scrollHeight + 'px';
+        if(textInput.scrollHeight < parseInt(attr.lineHeight)){
+            textInput.style.height = attr.lineHeight;
+        }else{
+            textInput.style.height = textInput.scrollHeight + 'px';
+        }
     }
     
 

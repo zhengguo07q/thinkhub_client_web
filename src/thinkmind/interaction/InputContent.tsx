@@ -63,8 +63,7 @@ export class InputContent extends ContextHolder {
         let attrNode = this.sceneContext.nodeLayer.items.get(id)!;      //值写入
         attrNode.updateConent(textInput.innerHTML)
         LayoutManager.getInstance().markChange();
-        let rootComputeNode = LayoutManager.getInstance().layout();
-        RenderManager.fastRender(rootComputeNode, this.sceneContext.nodeLayer.backgroundAttr);
+        LayoutManager.getInstance().layout(true);
     }
 
     /**

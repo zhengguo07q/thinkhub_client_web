@@ -3,24 +3,26 @@ import { ComputeNode } from '../item/ComputeNode';
 import { NodeAlgoAttrBase } from '../item/NodeAlgoAttr';
 import { Point } from '../util/Interface';
 import { BaseLayout } from './layouts/BaseLayout';
-import { DownwardOrganizationalLayout } from './layouts/DownwardOrganizationalLayout';
-import { LeftLogicalLayout } from './layouts/LeftLogicalLayout';
-import { RightLogicalLayout } from './layouts/RightLogicalLayout';
+import { DownwardLayout } from './layouts/DownwardLayout';
+import { LeftLayout } from './layouts/LeftLayout';
+import { RightLayout } from './layouts/RightLayout';
 import { StandardLayout } from './layouts/StandardLayout';
-import { UpwardOrganizationalLayout } from './layouts/UpwardOrganizationalLayout';
-import log, {Logger} from 'loglevel';
+import { UpwardLayout } from './layouts/UpwardLayout';
+import log, { Logger } from 'loglevel';
+import { RenderManagerInstance } from '../render/RenderManager';
+import { NodeAttr } from '../item/NodeAttr';
 
 export enum LayoutType {
-    LeftLogical,
-    RightLogical,
-    Downward,
-    Upward,
     Standard,
+    Right,
+    Left,
+    Upward,
+    Downward,
 }
 
 const HORIZONTAL_LAYOUTS = [
-    'LeftLogical',
-    'RightLogical',
+    'Left',
+    'Right',
     'Standard'
 ]
 
@@ -28,23 +30,22 @@ const HORIZONTAL_LAYOUTS = [
  * 画布大小，画布永远为内容宽高+2屏幕宽高
  */
 export class LayoutManager {
-    logger:Logger = log.getLogger("LayoutManager");
-    static instance:LayoutManager;
+    logger: Logger = log.getLogger("LayoutManager");
+    static instance: LayoutManager;
     layoutType: LayoutType = LayoutType.Standard;
-    root: any;
+    root: NodeAttr;
+    rootCompute: ComputeNode;
     algoAttr: NodeAlgoAttrBase;
     extraEdges = [];
 
-    layoutTree:BaseLayout;
-    change:boolean = false;
+    layoutTree: BaseLayout;
+    change: boolean = false;
 
-    protected firstId:string = '';
-    protected firstOrigin:Point = new Point();    //第一次的布局坐标
+    backgroundAttr: BackgroundAttr;
 
-    backgroundAttr:BackgroundAttr;
-
-    isHorizontal(type: string) {
-        return HORIZONTAL_LAYOUTS.indexOf(type) > -1
+    isHorizontal(type: LayoutType) {
+        let str = LayoutType[type];
+        return HORIZONTAL_LAYOUTS.indexOf(str) > -1
     }
 
     /**
@@ -72,10 +73,10 @@ export class LayoutManager {
      * @param algoAttr 
      * @param extraEdges 
      */
-    set(root: any, algoAttr: NodeAlgoAttrBase, backgroundAttr:BackgroundAttr, extraEdges = []) {
+    set(root: NodeAttr, algoAttr?: NodeAlgoAttrBase, backgroundAttr?: BackgroundAttr, extraEdges = []) {
         this.root = root;
-        this.algoAttr = algoAttr;
-        this.backgroundAttr = backgroundAttr;
+        this.algoAttr = algoAttr || this.algoAttr;
+        this.backgroundAttr = backgroundAttr || this.backgroundAttr;
         this.extraEdges = extraEdges;
         this.markChange();
     }
@@ -83,102 +84,90 @@ export class LayoutManager {
     /**
      * 标记改变
      */
-    markChange(){
+    markChange() {
         this.change = true;
     }
 
     /**
-     * 执行布局
+     * 执行布局，对内容对操作时，不调整滚动
      */
-    layout() :ComputeNode{
-        switch (this.layoutType) {
-            case LayoutType.LeftLogical:
-                this.layoutTree = new LeftLogicalLayout(this.root, this.algoAttr, this.extraEdges);
-                break;
-            case LayoutType.RightLogical:
-                this.layoutTree = new RightLogicalLayout(this.root, this.algoAttr, this.extraEdges);
-                break;
-            case LayoutType.Downward:
-                this.layoutTree = new DownwardOrganizationalLayout(this.root, this.algoAttr, this.extraEdges);
-                break;
-            case LayoutType.Upward:
-                this.layoutTree = new UpwardOrganizationalLayout(this.root, this.algoAttr, this.extraEdges);
-                break;
-            default :
-                this.layoutTree = new StandardLayout(this.root, this.algoAttr, this.extraEdges);
-                break;
+    layout(isFix: boolean = false) {
+        if (isFix) {
+            this.backgroundAttr.adjustScroll = false;
+        } else {
+            this.backgroundAttr.adjustScroll = true;
         }
 
-        var root = this.layoutTree.doLayout();
-        this.calculateBackground(root);
-        this.calculateOrigin(root);
+        if (this.change) {
+            ComputeNode.isCreateComplete = false;
+            switch (this.layoutType) {
+                case LayoutType.Left:
+                    this.layoutTree = new LeftLayout(this.root, this.algoAttr, this.extraEdges);
+                    break;
+                case LayoutType.Right:
+                    this.layoutTree = new RightLayout(this.root, this.algoAttr, this.extraEdges);
+                    break;
+                case LayoutType.Downward:
+                    this.layoutTree = new DownwardLayout(this.root, this.algoAttr, this.extraEdges);
+                    break;
+                case LayoutType.Upward:
+                    this.layoutTree = new UpwardLayout(this.root, this.algoAttr, this.extraEdges);
+                    break;
+                default:
+                    this.layoutTree = new StandardLayout(this.root, this.algoAttr, this.extraEdges);
+                    break;
+            }
 
-        return root;
+            this.rootCompute = this.layoutTree.doLayout();
+
+            this.calculateBackground();
+            ComputeNode.isCreateComplete = true;
+        }
+        RenderManagerInstance.fastRender(this.rootCompute, this.backgroundAttr, this.isHorizontal(this.layoutType));
     }
 
     /**
      * 布局场景，明确在场景中的位置
      * @param compute 
      */
-    calculateBackground(compute:ComputeNode){
-        const {left, top, width, height} = compute.getBoundingBox(); //内容的宽和高
+    calculateBackground() {
+        const { left, top, width, height } = this.rootCompute.getBoundingBox(); //内容的宽和高
         this.backgroundAttr.setContentSize(width, height);
 
-        const offsetWidth = this.backgroundAttr.marginH;    
+        const offsetWidth = this.backgroundAttr.marginH;
         const offsetHeight = this.backgroundAttr.marginV;
-        compute.eachNode((node:ComputeNode)=>{          //所有的节点，偏移到一定位置，为两边留空
-            node.x = node.x + offsetWidth;      
+        //获得当前和之前的root位置差距，一般情况下，应该不会很大
+
+
+        this.rootCompute.eachNode((node: ComputeNode) => {          //所有的节点，偏移到一定位置，为两边留空
+            node.x = node.x + offsetWidth;
             node.y = node.y + offsetHeight;
         })
+        this.logger.debug("设置中心点", this.rootCompute.x + this.rootCompute.width / 2, this.rootCompute.y + this.rootCompute.height / 2);
 
-        this.backgroundAttr.setRootCenterPosition(compute.x + compute.width/2, compute.y + compute.height/2);
-    }
-
-    /**
-     * 保持根节点不动
-     */
-    calculateOrigin(compute:ComputeNode){
-        //记录第一次的数据，不然则调整位置
-        if(compute.id != this.firstId){
-            this.firstOrigin.x = compute.x;
-            this.firstOrigin.y = compute.y;
-
-            this.firstId = compute.id; 
-        }else{
-            var diff = {x: compute.x - this.firstOrigin.x, y: compute.y - this.firstOrigin.y};
-    
-            //计算子节点
-            compute.eachNode((node: ComputeNode) => {
-                node.children.forEach((child: ComputeNode) => {
-                    child.x -= diff.x;
-                    child.y -= diff.y;
-                })
-            })
-            compute.x = this.firstOrigin.x; //保证原点
-            compute.y = this.firstOrigin.y;
-        }
+        this.backgroundAttr.setRootCenterPosition(this.rootCompute.x + this.rootCompute.width / 2, this.rootCompute.y + this.rootCompute.height / 2);
     }
 
     /**
      * 显示插入位置
      * @param p 
      */
-    getInserObject(p:Point){
+    getInserObject(p: Point) {
         let root = this.layoutTree.getRoot();
         let hitNode = root.getHit(p);
         return hitNode;
     }
 
-    tree(){
+    tree() {
         console.log('ComputeNode: ');
         this.print(this.layoutTree.getRoot(), '');
     }
 
-    print(node:ComputeNode, prefix:string){
+    print(node: ComputeNode, prefix: string) {
         var i;
         console.log(prefix + node.id)
         prefix = prefix + '    ';
-        for (i = 0; i<node.children.length ; i++){
+        for (i = 0; i < node.children.length; i++) {
             this.print(node.children[i], prefix);
         }
     }
@@ -186,11 +175,13 @@ export class LayoutManager {
     /**
      * 静态方法
      */
-    static getInstance():LayoutManager{
-        if(this.instance == null){
+    static getInstance(): LayoutManager {
+        if (this.instance == null) {
             this.instance = new LayoutManager();
         }
         return this.instance;
     }
 }
 
+
+export const LayoutManagerInstance = LayoutManager.getInstance();

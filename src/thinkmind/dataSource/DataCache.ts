@@ -4,6 +4,7 @@ import { JsonCreate } from '../interaction/JsonCreate';
 import StorageUtil from './StorageUtil';
 import { EventManager, EventType } from '../util/Event';
 import log, {Logger} from 'loglevel';
+import { TypeUtil } from '../util/TypeUtil';
 
 
 class DataCache {
@@ -146,6 +147,22 @@ class DataCache {
         delIds.forEach((id) => {
             this.treeMap.delete(id);
         });
+    }
+
+    /**
+     * 交换原来的节点, 这里只需要更新就好了
+     * @param nPId 
+     * @param sId 
+     * @param pos 
+     */
+    async exchangeNode(nPId:string, sId:string, pos:number){
+        let sData = this.treeMap.get(sId)!;
+        let pData = this.treeMap.get(sData.pid)!;
+        let nPData = this.treeMap.get(nPId)!;
+        
+        await StorageUtil.update(sData);
+        await StorageUtil.update(pData);
+        await StorageUtil.update(nPData);
     }
 
     /**

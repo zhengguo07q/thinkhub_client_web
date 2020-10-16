@@ -1,8 +1,9 @@
 import { ComputeNode } from '../item/ComputeNode';
 import { VNode } from 'snabbdom/build/package/vnode';
 import { h } from 'snabbdom/build/package/h';
+
 import { NodeAttr } from '@/thinkmind/item/NodeAttr';
-import { RenderContext, RenderObject } from './RenderContext';
+import { RenderContext, RenderObject, RenderOrientation } from './RenderContext';
 import { EventHelper } from '../util/EventHelper';
 import { Color } from '../util/ColorUtil'
 
@@ -15,8 +16,14 @@ import { Color } from '../util/ColorUtil'
         </rect>
     </g>
  */
+enum Orientation {
+    left,
+    top,
+    right,
+    bottom,
+}
 export class NodeRender {
-    render(renderContext: RenderContext, computeNode: ComputeNode): VNode[] {
+    render(renderContext: RenderContext, computeNode: ComputeNode, isHorizontal: boolean): VNode[] {
         const attr: NodeAttr = computeNode.data
 
         const x = Math.round(computeNode.x + computeNode.hgap)
@@ -26,11 +33,11 @@ export class NodeRender {
 
         const contentWidth = Math.round(width - 2 * attr.paddingX);
         const contentHeight = Math.round(height - 2 * attr.paddingY);
-        
+
         let nodes = [
-            h("g#" + RenderObject.NodeGroup + attr.data.id, { 
-                ns: RenderContext.NS_svg, 
-                attrs: { transform: 'translate(' + x + ' ' + y + ')' } ,
+            h("g#" + RenderObject.NodeGroup + attr.data.id, {
+                ns: RenderContext.NS_svg,
+                attrs: { transform: 'translate(' + x + ' ' + y + ')' },
                 on: {
                     mousedown: [EventHelper.eventGroupClick, EventHelper.eventGroupDown],
                     mouseenter: EventHelper.eventGroupEnter,
@@ -47,7 +54,7 @@ export class NodeRender {
                             height: height + 6,
                             rx: renderContext.backgroundAttr.borderRadiusSelect,
                             ry: renderContext.backgroundAttr.borderRadiusSelect,
-                            class:'nodeBorder',
+                            class: 'nodeBorder',
                         },
                         style: {
                             stroke: 'none',
@@ -107,14 +114,104 @@ export class NodeRender {
     }
 
     /**
+     * 
+     * @param renderContext 
+     * @param computeNode 
+     * @param isHorizontal 
+     * @param refOrientation 
+     */
+    renderCollapsed(renderContext: RenderContext, beginNode: ComputeNode, isHorizontal: boolean, orientation: RenderOrientation): VNode | undefined {
+        const attr: NodeAttr = beginNode.data;
+        let beginX: number, beginY: number;
+        //算出位置方向
+        switch (orientation) {
+            case RenderOrientation.LEFT:
+                beginX = Math.round(beginNode.x - attr.linkAttr.collapsedOffset);
+                beginY = Math.round(beginNode.y + beginNode.height / 2);
+                break;
+            case RenderOrientation.RIGHT:
+                beginX = Math.round(beginNode.x + beginNode.width - beginNode.hgap + attr.linkAttr.collapsedOffset);
+                beginY = Math.round(beginNode.y + beginNode.height / 2);
+                break;
+            case RenderOrientation.TOP:
+                beginX = Math.round(beginNode.x + beginNode.width / 2);
+                beginY = Math.round(beginNode.y - attr.linkAttr.collapsedOffset);
+                break;
+            case RenderOrientation.BOTTOM:
+                beginX = Math.round(beginNode.x + beginNode.width / 2);
+                beginY = Math.round(beginNode.y + beginNode.height - beginNode.vgap + attr.linkAttr.collapsedOffset);
+                break;
+        }
+        let v: VNode | undefined = undefined;
+        if (beginNode.isRoot()) {
+            return undefined;
+        }
+        //算出位置
+        if (attr.isCollapsed) {
+            v = h("g#" + RenderObject.NodeCollapsed + attr.data.id, {
+                ns: RenderContext.NS_svg,
+                attrs: { transform: 'translate(' + beginX + ' ' + beginY + ')' },
+                on:{click:EventHelper.eventCollapsedClickOpen},
+            }, [
+                h("circle", {
+                    attrs: {
+                        cx: 0, cy: 0, r: 5,
+                    },
+                    style: {
+                        stroke: attr.linkAttr.lineColor, strokeWidth: '1', fill: renderContext.backgroundAttr.background,
+                    },
+                    ns: RenderContext.NS_svg,
+                }),
+                h("text", {
+                    attrs: {
+                        x: -3, y: 3,
+                    },
+                    style: {
+                        stroke: attr.linkAttr.lineColor, strokeWidth: '1', fill: renderContext.backgroundAttr.background, userSelect:'none' , fontSize: '9', lineHeight: '12', fontWeight:'100'
+                    },
+                    ns: RenderContext.NS_svg,
+                }, [attr.data.childs.length])
+            ]);
+        } else {
+            v = h("g#" + RenderObject.NodeCollapsed + attr.data.id, {
+                ns: RenderContext.NS_svg,
+                attrs: { transform: 'translate(' + beginX + ' ' + beginY + ')' },
+                style: { visibility: 'hidden', },
+                on: { click: EventHelper.eventCollapsedClickClose },
+            }, [
+                h("circle", {
+                    attrs: {
+                        cx: 0, cy: 0, r: 5,
+                    },
+                    style: {
+                        stroke: attr.linkAttr.lineColor, strokeWidth: '1', fill: renderContext.backgroundAttr.background,
+                    },
+                    ns: RenderContext.NS_svg,
+                }),
+                h("line", {
+                    attrs: {
+                        x1: -4, y1: 0, x2: 4, y2: 0
+                    },
+                    style: {
+                        stroke: attr.linkAttr.lineColor, strokeWidth: '1', fill: renderContext.backgroundAttr.background,
+                    },
+                    ns: RenderContext.NS_svg,
+                })
+            ]);
+        }
+
+        return v;
+    }
+
+    /**
      * 一些辅助性图形
      * @param computeNode 
      */
-    renderExts(computeNode: ComputeNode):VNode[]{
+    renderExts(computeNode: ComputeNode): VNode[] {
         const attr: NodeAttr = computeNode.data
-        let exts:VNode[] = [];
+        let exts: VNode[] = [];
         computeNode.showBBox = true;
-        if(computeNode.showBBox){
+        if (computeNode.showBBox) {
             let bbox = computeNode.getBoundingBox();
             exts.push(h("rect#" + RenderObject.NodeExt + attr.data.id, {
                 attrs:
@@ -124,10 +221,10 @@ export class NodeRender {
                     width: bbox.width - bbox.left,
                     height: bbox.height - bbox.top,
                 },
-                style:{
-                    strokeWidth:'1',
+                style: {
+                    strokeWidth: '1',
                     stroke: Color.randomColor(),
-                    fillOpacity:'0',
+                    fillOpacity: '0',
                 },
                 ns: RenderContext.NS_svg
             }));

@@ -1,6 +1,7 @@
 import { Point } from '../util/Interface';
 import { NodeAlgoAttrBase } from './NodeAlgoAttr';
 import log, {Logger} from 'loglevel';
+import { NodeAttr } from './NodeAttr';
 
 export class ComputeNode {
     static computeNodeCaches: Map<string, ComputeNode>;
@@ -18,12 +19,13 @@ export class ComputeNode {
     children: ComputeNode[];
     data: any;
     showBBox:boolean = false;
+    isTemp:boolean = false;
+    bbox;
+    static isCreateComplete:boolean = false;    //创建完成后，所有的调用计算数据都会开始缓存
 
-    constructor(data, algoAttr: NodeAlgoAttrBase) {
+    constructor(data:NodeAttr, algoAttr: NodeAlgoAttrBase) {
         this.vgap = this.hgap = 0
-        if (data instanceof ComputeNode) {
-            return this;
-        }
+
         var hgap = algoAttr.getHGap(data);
         var vgap = algoAttr.getVGap(data);
         this.data = data;
@@ -33,6 +35,7 @@ export class ComputeNode {
         this.id = algoAttr.getId(data)
         this.x = this.y = 0
         this.depth = 0
+        this.isTemp = data.isTemp;
 
         if (!this.children) {
             this.children = []
@@ -77,7 +80,7 @@ export class ComputeNode {
         }
         return rootNode;
     }
-
+    
     /**
      * 判断是否为根节点
      */
@@ -114,6 +117,9 @@ export class ComputeNode {
      * 得到执行节点的bb盒子
      */
     getBoundingBox() {
+        if(this.bbox != undefined){
+            return this.bbox;
+        }
         const bb = {
             left: Number.MAX_VALUE,
             top: Number.MAX_VALUE,
@@ -126,6 +132,10 @@ export class ComputeNode {
             bb.width = Math.max(bb.width, node.x + node.width)
             bb.height = Math.max(bb.height, node.y + node.height)
         })
+//        this.logger.trace("计算getBoundingBox", this.data.data.content, bb);
+        if(ComputeNode.isCreateComplete == true){  
+            this.bbox = bb;
+        }
         return bb
     }
 
@@ -164,15 +174,14 @@ export class ComputeNode {
     }
 
     /**
-     * 得到命中节点
+     * 得到命中节点, 有待优化
      * @param p 
      */
-    getHit(p:Point):ComputeNode{
-        let hitNode:ComputeNode = this;
+    getHit(p:Point):ComputeNode|undefined{
+        let hitNode:ComputeNode|undefined = undefined;
         this.eachNode((node:ComputeNode)=>{
-            if(node.isHit(p)){
+            if(node.isTemp == false && node.isHit(p)){
                 hitNode = node;
-                return hitNode;
             }
         })
         return hitNode;

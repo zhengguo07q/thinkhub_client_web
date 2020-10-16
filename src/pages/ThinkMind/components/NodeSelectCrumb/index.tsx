@@ -25,7 +25,7 @@ const NodeSelectCrumb = (props, context) => {
 
     const getBreadcrumbItem = () => {
         return DataCache.cacheCrumbs.map((node:MindData)=>{
-        return <Breadcrumb.Item style={{lineHeight:'22px', height:'22px'}}  key={node.id} id={node.id} onClick={clickItemLink}>{TypeUtil.getShortTxt(node.content)}</Breadcrumb.Item>
+        return <Breadcrumb.Item style={{lineHeight:'22px', height:'22px', cursor:"pointer"}}  key={node.id} id={node.id} onClick={clickItemLink}>{TypeUtil.getShortTxt(node.content)}</Breadcrumb.Item>
         });
     }
 

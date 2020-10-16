@@ -13,6 +13,26 @@ export class EventHelper{
         selectNode.eventGroupLeave.bind(selectNode, e, n)();
     }
 
+    static eventLineEnter(e:MouseEvent, n:VNode){
+        let selectNode = SelectNode.getInstance<SelectNode>();
+        selectNode.eventLineEnter.bind(selectNode, e, n)();
+    }
+
+    static eventLineLeave(e:MouseEvent, n:VNode){
+        let selectNode = SelectNode.getInstance<SelectNode>();
+        selectNode.eventLineLeave.bind(selectNode, e, n)();
+    }
+
+    static eventCollapsedClickClose(e:MouseEvent, n:VNode){
+        let selectNode = SelectNode.getInstance<SelectNode>();
+        selectNode.eventCollapsedClickClose.bind(selectNode, e, n)();
+    } 
+
+    static eventCollapsedClickOpen(e:MouseEvent, n:VNode){
+        let selectNode = SelectNode.getInstance<SelectNode>();
+        selectNode.eventCollapsedClickOpen.bind(selectNode, e, n)();
+    } 
+
     static eventGroupClick(e:MouseEvent, n:VNode){
         let selectNode = SelectNode.getInstance<SelectNode>();
         selectNode.eventGroupClick.bind(selectNode, e, n)();
@@ -47,6 +67,5 @@ export class EventHelper{
         let dragNode = DragNode.getInstance<DragNode>();
         dragNode.onStartDrag.bind(dragNode, e, n)();
     }
-
 
 }

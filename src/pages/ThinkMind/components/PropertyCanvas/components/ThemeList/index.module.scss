@@ -1,0 +1,31 @@
+.themeName{
+    position: absolute;
+    width: 220px;
+    text-align: center;
+    line-height: 50px;
+    user-select: none;
+    cursor: pointer;
+}
+
+.image{
+    border: 1px solid #ccc;
+    margin: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.imageBlur{
+    border: 1px solid #1cb408;
+    margin: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.imageActive{
+    border: 1px solid #d308b1;
+    margin: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+

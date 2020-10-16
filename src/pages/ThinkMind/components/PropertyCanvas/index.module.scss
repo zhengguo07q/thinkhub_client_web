@@ -1,6 +1,12 @@
 .container {
-  overflow: hidden;
-  text-align: center;
+  //text-align: center;
   background-color: $color-white;
+  height: 600px;
+  overflow: auto;
 }
 
+.colorBalloon{
+    padding: 0px;
+    border: 0px;
+    width: 225px !important;
+}

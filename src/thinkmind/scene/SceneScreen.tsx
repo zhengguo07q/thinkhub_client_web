@@ -3,11 +3,12 @@ import { NodeLayer } from './NodeLayer';
 import { AppHistory } from './AppHistory';
 
 import { CopyPaste, CreateNode, DragNode, JsonCreate, SelectNode } from '../interaction'
-import { RenderManager } from '../render/RenderManager';
+import { RenderManagerInstance } from '../render/RenderManager';
 import { InputContent } from '../interaction/InputContent';
 import { MoveScreen } from '../interaction/MoveScreen';
 import { DeleteNode } from '../interaction/DeleteNode';
 import { SetRootNode } from '../interaction/SetRootNode';
+import { EditorNode } from '../interaction/EditorNode';
 import DataCache from '../dataSource/DataCache';
 
 import log, {Logger} from 'loglevel'
@@ -31,7 +32,7 @@ export class SceneScreen{
 
         this.interaction();
 
-        RenderManager.initialize(rootElement);
+        RenderManagerInstance.initialize(rootElement);
         this.logger.info("end thinkhub");
         DataCache.setRootDefault();
     }
@@ -49,6 +50,7 @@ export class SceneScreen{
         DeleteNode.build(DeleteNode, SceneScreen.context);
         SetRootNode.build(SetRootNode, SceneScreen.context);
         DragNode.build(DragNode, SceneScreen.context);
+        EditorNode.build(EditorNode, SceneScreen.context);
     }
 
     /**
@@ -63,6 +65,7 @@ export class SceneScreen{
         MoveScreen.build(MoveScreen, SceneScreen.context).destory();
         SetRootNode.build(SetRootNode, SceneScreen.context).destory();
         DragNode.build(DragNode, SceneScreen.context).destory();
+        EditorNode.build(EditorNode, SceneScreen.context).destory();
     }
 
 
