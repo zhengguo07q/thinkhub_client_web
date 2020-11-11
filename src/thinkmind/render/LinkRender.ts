@@ -5,6 +5,7 @@ import { NodeAttr } from '@/thinkmind/item/NodeAttr';
 import { LinkAttr } from '@/thinkmind/item/LinkAttr';
 import { RenderContext,RenderObject } from './RenderContext';
 import { EventHelper } from '../util/EventHelper';
+import { LinkPositionType } from '../config/Theme'
 
 export class LinkRender  {
     render(renderContext:RenderContext, rootNode: ComputeNode, childNode: ComputeNode, isHorizontal:boolean, scale:number=1): VNode{
@@ -22,14 +23,25 @@ export class LinkRender  {
                 endNode = rootNode;
             }
             beginX = Math.round(beginNode.x + beginNode.width - beginNode.hgap);
-            beginY = Math.round(beginNode.y + beginNode.height / 2);
+            if(beginNode.data.linkPos == LinkPositionType.axisCenter){
+                beginY = Math.round(beginNode.y + beginNode.height / 2); 
+            }else if(beginNode.data.linkPos == LinkPositionType.baseLine){
+                beginY = Math.round(beginNode.y + beginNode.height - beginNode.vgap);  //要去掉一个gap
+            }
             endX = Math.round(endNode.x + endNode.hgap);
-            endY = Math.round(endNode.y + endNode.height / 2);
+
+            if(endNode.data.linkPos == LinkPositionType.axisCenter){
+                endY = Math.round(endNode.y + endNode.height / 2);
+            }else if(endNode.data.linkPos == LinkPositionType.baseLine){
+                endY = Math.round(endNode.y + endNode.height - endNode.vgap);
+            }
+            
         } else {                                //垂直
             if (rootNode.y > childNode.y) {     //根在下面，交换位置
                 beginNode = childNode;
                 endNode = rootNode;
             }
+
             beginX = Math.round(beginNode.x + beginNode.width / 2);
             beginY = Math.round(beginNode.y + beginNode.height - beginNode.vgap);
             endX = Math.round(endNode.x + endNode.width / 2);

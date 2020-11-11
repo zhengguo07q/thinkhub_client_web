@@ -1,69 +1,42 @@
 import { VNode } from 'snabbdom/build/package/vnode';
 import { LayoutManager } from '../layout/LayoutManager';
 import { RenderObject } from '../render/RenderContext';
-import { RenderManager } from '../render/RenderManager';
 import { RenderUtil } from '../render/RenderUtil';
 import { ContextHolder } from '../util/ContextHolder';
-import  HtmlSizeAlgoUtil  from '../util/HtmlSizeAlgoUtil';
+import HtmlSizeAlgoUtil from '../util/HtmlSizeAlgoUtil';
 
 
 export class InputContent extends ContextHolder {
-    content:string ;
-    initialize() {}
+    content: string;
+    initialize() { }
 
-    destory() {}
-
-    onFocus(event: FocusEvent, vnode: VNode) {
-        let textInput: HTMLElement = event.currentTarget as HTMLElement;
-        this.content = textInput.innerHTML;
-    }
-
-    onInput(event: InputEvent, vnode: VNode) {
-        let textInput: HTMLElement = event.currentTarget as HTMLElement;
-        let oldWidth = parseInt(textInput.getAttribute("width")!);
-        let oldHeight = parseInt(textInput.getAttribute("height")!);
-        let isAdjust = HtmlSizeAlgoUtil.adjustmentSize(textInput);
-
-        //调整外框大小
-        if(isAdjust){
-            let id = RenderUtil.getIdBySel(vnode.sel!);
-            let newWidth = parseInt(textInput.getAttribute("width")!);
-            let newHeight = parseInt(textInput.getAttribute("height")!);
-            this.setNodeSize(id, oldWidth, oldHeight, newWidth, newHeight);
-        }
-    }
+    destory() { }
 
     /**
-     * 设置父容器的大小
-     * @param id 
-     * @param width 
-     * @param height 
+     * 事件文本输入
+     * @param event 
+     * @param vnode 
      */
-    setNodeSize(id:string, owidth:number, oheight:number, width:number, height: number){
-        let changeW = width - owidth, changeH = height - oheight;
-        
-        let foreignElement:SVGForeignObjectElement = document.getElementById(RenderObject.NodeForeignObject + id)! as any;
+    eventTextareaInput(event: InputEvent, vnode: VNode) {
+        let textInput: HTMLElement = event.currentTarget as HTMLElement;
+        let height = textInput.scrollHeight;
 
-        foreignElement.setAttribute('width', parseInt(foreignElement.getAttribute('width')!) + changeW + '');
-        foreignElement.setAttribute('height', parseInt(foreignElement.getAttribute('height')!) + changeH + '');
+        let newWidth = HtmlSizeAlgoUtil.adjustmentWidth(textInput);
+        let id = RenderUtil.getIdBySel(vnode.sel!);
+        let attr = this.sceneContext.nodeLayer.items.get(id)!;
 
-        let rectElement:SVGRectElement = document.getElementById(RenderObject.NodeRect + id) as any;
-        rectElement.setAttribute('width', parseInt(rectElement.getAttribute('width')!) + changeW + '');
-        rectElement.setAttribute('height', parseInt(rectElement.getAttribute('height')!) + changeH + '');
+        let foreignElement: HTMLElement = document.getElementById(RenderObject.NodeForeignObject + id)!;
+        let rectElement: HTMLElement = document.getElementById(RenderObject.NodeRect + id)!;
+        let borderElement: HTMLElement = document.getElementById(RenderObject.NodeBorder + id)!;
 
-        let borderElement:SVGRectElement = document.getElementById(RenderObject.NodeBorder + id) as any;
-       borderElement.setAttribute('width', parseInt(borderElement.getAttribute('width')!) + changeW + '');
-       borderElement.setAttribute('height', parseInt(borderElement.getAttribute('height')!) + changeH + '');
-    }
+        foreignElement.setAttribute('width', newWidth + '');
+        foreignElement.setAttribute('height', height + '');
 
-    /**
-     * 
-     */
-    change(textInput:HTMLSpanElement, id:string) {
-        let attrNode = this.sceneContext.nodeLayer.items.get(id)!;      //值写入
-        attrNode.updateConent(textInput.innerHTML)
-        LayoutManager.getInstance().markChange();
-        LayoutManager.getInstance().layout(true);
+        rectElement.setAttribute('width', newWidth + 2 * attr.paddingX + '');
+        rectElement.setAttribute('height', height + 2 * attr.paddingY + '');
+
+        borderElement.setAttribute('width', newWidth + 2 * attr.paddingX + 6 + '');
+        borderElement.setAttribute('height', height + 2 * attr.paddingY + 6 + '');
     }
 
     /**
@@ -71,14 +44,34 @@ export class InputContent extends ContextHolder {
      * @param event 
      * @param vnode 
      */
-    onBlurTextarea(event: FocusEvent, vnode: VNode) {
+    eventTextareaBlur(event: FocusEvent, vnode: VNode) {
         let textInput: HTMLElement = event.currentTarget as HTMLElement;
         textInput.style.pointerEvents = 'none';
         textInput.autofocus = false;
         event.stopPropagation();
-        if(textInput.innerHTML != this.content){    //内容不相等，则需要重新调整
+        if (textInput.innerHTML != this.content) {    //内容不相等，则需要重新调整
             this.change(textInput, RenderUtil.getIdBySel(vnode.sel!));
         }
+    }
+
+    /**
+     * 时间文本焦点
+     * @param event 
+     * @param vnode 
+     */
+    eventTextareaFocus(event: FocusEvent, vnode: VNode) {
+        let textInput: HTMLElement = event.currentTarget as HTMLElement;
+        this.content = textInput.innerHTML;
+    }
+
+    /**
+     * 
+     */
+    change(textInput: HTMLSpanElement, id: string) {
+        let attrNode = this.sceneContext.nodeLayer.items.get(id)!;      //值写入
+        attrNode.updateConent(textInput.innerHTML)
+        LayoutManager.getInstance().markChange();
+        LayoutManager.getInstance().layout(true);
     }
 
     /**
@@ -87,12 +80,13 @@ export class InputContent extends ContextHolder {
      * @param vnode 
      */
     onDbClickRect(event: MouseEvent, vnode: VNode) {
+        this.logger.debug("双击编辑");
         let foreign: any = event.currentTarget;
         let nodeId = RenderUtil.getIdBySel(foreign.id);
         let textInput: HTMLElement = document.getElementById(RenderObject.NodeTextarea + nodeId) as HTMLElement;
         textInput.style.pointerEvents = 'auto';
         textInput.autofocus = true;
-        textInput.contentEditable = "true";
+        textInput.contentEditable = "plaintext-only";
     }
 
 

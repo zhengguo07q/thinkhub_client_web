@@ -36,7 +36,6 @@ export class ComputeNode {
         this.x = this.y = 0
         this.depth = 0
         this.isTemp = data.isTemp;
-
         if (!this.children) {
             this.children = []
         }
@@ -66,6 +65,7 @@ export class ComputeNode {
                     node.children = [];
                     if (children && length) {
                         for (var i = 0; i < length; i++) {
+                            console.log(children[i].data.id, children[i].data.content);
                             const child = new ComputeNode(children[i], attrAlgo);   //创建当前节点的子对象
                             
                             node.children.push(child);                  //建立子到父的关系
@@ -89,7 +89,7 @@ export class ComputeNode {
     }
 
     /**
-     * 添加垂直和水平间距
+     * 添加水平间距和垂直
      * @param hgap 
      * @param vgap 
      */

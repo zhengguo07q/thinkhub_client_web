@@ -2,7 +2,6 @@ import { ContextHolder } from '../util/ContextHolder';
 import Mousetrap from 'mousetrap';
 import { createNewNode, MindData } from '../dataSource/MindData';
 import { LayoutManager } from '../layout/LayoutManager';
-import { RenderManager } from '../render/RenderManager';
 
 /**
  * 通过操作创建节点

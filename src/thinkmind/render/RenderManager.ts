@@ -82,7 +82,7 @@ class RenderManager {
             list.push(childVnode);
         });
         //折叠节点
-        this.logger.debug('方向', computeNode.data.data.content, RenderOrientation[orientation]);
+    //    this.logger.debug('方向', computeNode.data.data.content, RenderOrientation[orientation]);
         const gCollapsed= this.nodeRender.renderCollapsed(this.renderContext, computeNode, isHorizontal, orientation);//节点折叠 
         if(gCollapsed != undefined){
             linkList.push(gCollapsed);

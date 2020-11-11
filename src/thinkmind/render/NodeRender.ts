@@ -5,7 +5,9 @@ import { h } from 'snabbdom/build/package/h';
 import { NodeAttr } from '@/thinkmind/item/NodeAttr';
 import { RenderContext, RenderObject, RenderOrientation } from './RenderContext';
 import { EventHelper } from '../util/EventHelper';
-import { Color } from '../util/ColorUtil'
+import { Color } from '../util/ColorUtil';
+import { BackgroundModelType } from '../config/Theme';
+import log, {Logger} from 'loglevel';
 
 /** 
  * 	<g>
@@ -16,13 +18,9 @@ import { Color } from '../util/ColorUtil'
         </rect>
     </g>
  */
-enum Orientation {
-    left,
-    top,
-    right,
-    bottom,
-}
+
 export class NodeRender {
+    logger:Logger = log.getLogger("NodeRender");
     render(renderContext: RenderContext, computeNode: ComputeNode, isHorizontal: boolean): VNode[] {
         const attr: NodeAttr = computeNode.data
 
@@ -42,6 +40,7 @@ export class NodeRender {
                     mousedown: [EventHelper.eventGroupClick, EventHelper.eventGroupDown],
                     mouseenter: EventHelper.eventGroupEnter,
                     mouseleave: EventHelper.eventGroupLeave,
+                    dblclick: EventHelper.eventForeignDbClick,
                 }
             }, [
                 h("rect#" + RenderObject.NodeBorder + attr.data.id,
@@ -63,19 +62,7 @@ export class NodeRender {
                         },
                         ns: RenderContext.NS_svg
                     }),
-                h("rect#" + RenderObject.NodeRect + attr.data.id,
-                    {
-                        attrs:
-                        {
-                            width: width,
-                            height: height,
-                            rx: attr.borderRadius,
-                            ry: attr.borderRadius,
-                            stroke: attr.borderColor,
-                            fill: attr.background,
-                        },
-                        ns: RenderContext.NS_svg
-                    }),
+                    this.getRenderBackgound(attr, width, height, isHorizontal),
                 h("foreignObject#" + RenderObject.NodeForeignObject + attr.data.id,
                     {
                         attrs:
@@ -85,17 +72,17 @@ export class NodeRender {
                             width: contentWidth,
                             height: contentHeight,
                             stroke: attr.borderColor,
-                            fill: attr.background,
+                            fill: attr.backgroundType == BackgroundModelType.baseLine? 'none': attr.background,
                         },
                         on:
                         {
-                            dblclick: EventHelper.eventForeignDbClick,
+                            //dblclick: EventHelper.eventForeignDbClick,
                         },
                         ns: RenderContext.NS_svg
                     }, [
                     h("div#" + RenderObject.NodeTextarea + attr.data.id,
                         {
-                            style: NodeRender.getTextStyleObject(attr, {}),
+                            style: this.getTextStyleObject(renderContext, attr, {}),
                             attrs:
                             {
                                 width: contentWidth,
@@ -114,6 +101,27 @@ export class NodeRender {
     }
 
     /**
+     * 获得节点背景, 水平的时候才改变背景方式
+     * @param attr 
+     * @param width 
+     * @param height 
+     */
+    getRenderBackgound(attr: NodeAttr, width:number, height:number, isHorizontal:boolean):VNode{
+        if(isHorizontal && attr.backgroundType == BackgroundModelType.baseLine){
+            return h("line#" + RenderObject.NodeRect + attr.data.id ,{ns: RenderContext.NS_svg, attrs:{x1:0, y1:height, x2:width, y2:height}, style:{stroke: attr.borderColor, strokeWidth: attr.borderWidth}});
+        }else{
+            return h("rect#" + RenderObject.NodeRect + attr.data.id,
+            {
+                attrs:
+                {
+                    width: width, height: height, rx: attr.borderRadius, ry: attr.borderRadius,stroke: attr.borderColor, fill: attr.background,
+                },
+                ns: RenderContext.NS_svg
+            })
+        }
+    }
+
+    /**
      * 
      * @param renderContext 
      * @param computeNode 
@@ -122,6 +130,9 @@ export class NodeRender {
      */
     renderCollapsed(renderContext: RenderContext, beginNode: ComputeNode, isHorizontal: boolean, orientation: RenderOrientation): VNode | undefined {
         const attr: NodeAttr = beginNode.data;
+        if (beginNode.isRoot() || attr.data.childs.length == 0) { //根节点或者没有子节点
+            return undefined;
+        }
         let beginX: number, beginY: number;
         //算出位置方向
         switch (orientation) {
@@ -143,9 +154,7 @@ export class NodeRender {
                 break;
         }
         let v: VNode | undefined = undefined;
-        if (beginNode.isRoot()) {
-            return undefined;
-        }
+
         //算出位置
         if (attr.isCollapsed) {
             v = h("g#" + RenderObject.NodeCollapsed + attr.data.id, {
@@ -173,10 +182,11 @@ export class NodeRender {
                 }, [attr.data.childs.length])
             ]);
         } else {
+            
             v = h("g#" + RenderObject.NodeCollapsed + attr.data.id, {
                 ns: RenderContext.NS_svg,
                 attrs: { transform: 'translate(' + beginX + ' ' + beginY + ')' },
-                style: { visibility: 'hidden', },
+                style: {visibility: (attr.showCollapsed? 'visible':'hidden'), },
                 on: { click: EventHelper.eventCollapsedClickClose },
             }, [
                 h("circle", {
@@ -236,20 +246,25 @@ export class NodeRender {
      * 获得文本域的样式对象
      * @param attr 
      */
-    static getTextStyleObject(attr: NodeAttr, object: any): any {
-        return Object.assign({ //white-space: pre-wrap; word-break: break-word; pointer-events: none; user-select: none;
+    getTextStyleObject(renderContext:RenderContext, attr: NodeAttr, object: any): any {
+        let styles =  Object.assign({ //white-space: pre-wrap; word-break: break-word; pointer-events: none; user-select: none;
+            boxSizing: "border-box",
             resize: 'none',
             border: '0 none',
-            backgroundColor: attr.background,
+            backgroundColor: attr.backgroundType == BackgroundModelType.baseLine? renderContext.backgroundAttr.background: attr.background, 
             color: attr.color,
             whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
+            wordBreak: 'break-all',
+            overflow:'visible',
             pointerEvents: 'none',
             userSelect: 'none',
             fontFamily: attr.fontFamily,
             fontSize: attr.fontSize,
             fontWeight: attr.fontWeight,
             outline: 'none',
+            maxWidth: '300',
+            minWidth: '5',
         }, object);
+        return styles;
     }
 }

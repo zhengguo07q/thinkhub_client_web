@@ -27,7 +27,7 @@ export type MindData = {
     childs:string[];
     frees?: string[];
     connects?: string[];
-
+    auth?:string;                //''代表自己
     //以下内容在次级目录上有
     isSubVisible?:boolean;         //当前子是否可见状态
     sortId?:number;             //这个会在第一次写入数据库的时候写入

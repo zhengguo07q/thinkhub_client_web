@@ -31,27 +31,7 @@ const SVGCancvs = () => {
 
     }
 
-    const onDialogClose = () =>{
-
-    }
-
-    const onDialogCancel = () =>{
-        
-    }
-
-    const onDialogOk= (op:string) =>{
-
-    }
-
     return (<div>
-       { /*<Dialog
-            title="Welcome to Alibaba.com"
-            visible={visible.value}
-            onOk={onDialogOk("onOk")}
-            onCancel={this.onClose.bind(this, 'cancelClick')}
-            onClose={this.onClose}>
-            Start your business here by searching a popular product
-       </Dialog>*/}
         <div id='svgContainer' className={styles.container}>
         </div>
     </div>

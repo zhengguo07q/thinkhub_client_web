@@ -10,7 +10,7 @@ class MindSource {
     logger:Logger = log.getLogger('MindSource');
 
     rootData: MindData;                          //根节点，原生对象，其他数据不应该保存在里面
-    ROOT; //保存数据库的根节点
+    ROOT:MindData; //保存数据库的根节点
     CURRENT: MindData;
     PRIVATE: MindData;
     TEMP: MindData;           //临时
@@ -42,7 +42,7 @@ class MindSource {
             return;
         }
         
-        const openRes = await StorageUtil.openDatabase();
+        const openRes = await StorageUtil.make();
         if (openRes.isNew == true) {
             for (let i = 0; i < MindDataInitialize.length; i++) {
                 await StorageUtil.add(MindDataInitialize[i]);
@@ -55,6 +55,7 @@ class MindSource {
             this[typeData.content + '_LIST'] = await this.getSimpleSubNode(typeData);       //缓存当前的其他引用
         }
         this.checkInitNode();
+
         this.isInit = true
     }
 
@@ -65,10 +66,6 @@ class MindSource {
      * @param id 
      */
     async addRecent(id: string) {
-        if (id == this.RECENT.id) {       //去掉自身，避免死循环
-            return;
-        }
-
         let refData = await this.getUniqueSameLevelRef(this.RECENT, id);
 
         TypeUtil.arrayRemove(this.RECENT.childs, refData.id);       //删除之前的记录, 如果有的话

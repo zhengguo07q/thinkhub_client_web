@@ -149,10 +149,10 @@ export class LayoutManager {
     }
 
     /**
-     * 显示插入位置
+     * 显示命中节点
      * @param p 
      */
-    getInserObject(p: Point) {
+    getHitNode(p: Point): ComputeNode|undefined{
         let root = this.layoutTree.getRoot();
         let hitNode = root.getHit(p);
         return hitNode;

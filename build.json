@@ -8,14 +8,15 @@
         ],
         [
             "build-plugin-moment-locales",
-            {
+            { 
                 "locales": [
-                    "zh-cn"
+                    "zh-cn" 
                 ]
-            }
-        ]
-    ],
-    "router": {
-  
-    }
-}
+            }   
+        ],
+        "./build.plugin.js"
+    ], 
+    "router": {     
+   
+    } 
+} 

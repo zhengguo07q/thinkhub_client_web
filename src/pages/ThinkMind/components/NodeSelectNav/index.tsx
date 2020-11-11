@@ -30,22 +30,22 @@ const NodeSelectNav = () => {
 
     //刷新数据
     const getCurrentMindDatas = () => {
-        return DataCache.cacheSiblings.map(data => { return <List.Item key={data.id}><Button text type="primary" id={data.id} onClick={clickMindNode}>{TypeUtil.getShortTxt(data.content)}</Button></List.Item> })
+        return DataCache.cacheSiblings.map(data => { return <List.Item key={data.id}><Button className={styles.button} text type="primary" id={data.id} onClick={clickMindNode}>{TypeUtil.getShortTxt(data.content)}</Button></List.Item> })
     };
 
     const getTabMindDatas = (tabType:MindTabType)=>{
         let refList:MindData[] = DataCache.getReference(tabType);
-        return refList.map(data => { return <List.Item key={data.id}><Button text type="primary" id={data.id} onClick={clickMindNode}>{TypeUtil.getShortTxt(data.content)}</Button></List.Item> });
+        return refList.map(data => { return <List.Item key={data.id}><Button className={styles.button} text type="primary" id={data.id} onClick={clickMindNode}>{TypeUtil.getShortTxt(data.content)}</Button></List.Item> });
     }
 
     const ChangeTab = (tabType:MindTabType) =>{
         setRefresh(refresh=>!refresh);
     }
 
-    return (<div className={styles.container}>
+    return (<div className={styles.container}> 
         <Tab shape="text" onChange={ChangeTab}>
             <Tab.Item title="当前" key="CURRENT">
-                <div style={{ width: 288 }}>
+                <div >
                     <List size="small">
                         {getCurrentMindDatas()}
                     </List>

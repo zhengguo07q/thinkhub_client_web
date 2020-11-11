@@ -13,7 +13,7 @@ export default {
     themeDesc:{
         id:"simple",
         name:"简单",
-        img: "http://49.235.127.72/images/brief.png",
+        img: "http://49.235.127.72/images/simple.png",
     },
     //主主题样式
     rootTopic: {
@@ -55,7 +55,7 @@ export default {
             lineWidth: 2,                       //行宽
             lineColor: '#b4b4b4',               //行颜色
             lineRadius: 1,                     //行角半径
-            collapsedOffset: 5,
+            collapsedOffset: 6,
         },                         
     },             
     //次主题样式
@@ -72,8 +72,8 @@ export default {
             borderStyle: 'none',              //边框样式
             borderColor: '#ffffff',           //边框颜色
 
-            paddingX:15, 
-            paddingY:10,
+            paddingX:14, 
+            paddingY:8,
 
             background: '#ebecf3',            //背景色
 
@@ -98,7 +98,7 @@ export default {
             lineWidth: 1,                       //行宽
             lineColor: '#b4b4b4',               //行颜色
             lineRadius: 0,                     //行角半径
-            collapsedOffset: 5,
+            collapsedOffset: 6,
         },              
     },          
     //正常主题样式
@@ -106,17 +106,17 @@ export default {
         contentStyle: {
             nodeType: 'Rectangle',           //节点渲染
 
-            marginH: 8,                    //边距水平
-            marginV: 1,                    //边距垂直
+            marginH: 10,                    //边距水平
+            marginV: 4,                    //边距垂直
 
             border: '0',                    //边框
-            borderRadius: '5',              //边角
+            borderRadius: '1',              //边角
             borderWidth: '1',               //边宽
             borderStyle: 'none',              //边框样式
-            borderColor: '#ffffff',           //边框颜色
+            borderColor: '#b4b4b4',           //边框颜色
 
-            paddingX:8, 
-            paddingY:6,
+            paddingX:2, 
+            paddingY:2,
 
             background: '#ffffff',            //背景色
 
@@ -140,7 +140,7 @@ export default {
             lineWidth: 1,                       //行宽
             lineColor: '#b4b4b4',               //行颜色
             lineRadius: 0,                     //行角半径
-            collapsedOffset: 5,
+            collapsedOffset: 6,
         }           
     },   
     //独立的主题，一般情况下与次级的一样
@@ -173,8 +173,8 @@ export default {
             fontWeight:'',                      //粗体
             
             content:'   ',
-            linkPos:LinkPositionType.baseLine,
-            backgroundType:BackgroundModelType.baseLine,
+            linkPos:LinkPositionType.axisCenter,
+            backgroundType:BackgroundModelType.backgroundBorder,
             showCollapsed:false,
         },   
         linkStyle: {
@@ -183,7 +183,7 @@ export default {
             lineWidth: 1,                       //行宽
             lineColor: '#b4b4b4',               //行颜色
             lineRadius: 0,                     //行角半径
-            collapsedOffset: 5,
+            collapsedOffset: 6,
         },              
     },     
 }

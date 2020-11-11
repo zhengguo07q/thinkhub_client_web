@@ -5,8 +5,8 @@ import { Box, Button,  List } from '@alifd/next';
 import { ThemeManagerInstance } from '@/thinkmind/config/ThemeManager';
 import { TypeUtil } from '@/thinkmind/util/TypeUtil';
 import { ThemeDesc } from '@/thinkmind/config/Theme';
-import { LayoutManager } from '@/thinkmind/layout/LayoutManager';
 import { EditorNode } from '@/thinkmind/interaction';
+import { ThemeCurrentInstance } from '@/thinkmind/config/ThemeCurrent';
 
 
 const ThemeList = () => {
@@ -34,13 +34,9 @@ const ThemeList = () => {
 
     const onMouseClick = (key:string) =>{
         setActiveKey(key);
-        ThemeManagerInstance.setCacheTheme(key);
+        ThemeCurrentInstance.useTheme(key);
         EditorNode.getInstance<EditorNode>().updateTheme();
         //更换主题
-    }
-
-    const onMouseDbClick = (key:string) =>{
-        onMouseClick(key);
         onThemeListShowClick();
     }
 
@@ -50,7 +46,7 @@ const ThemeList = () => {
     const getStyleList = () => {
         return themeListState.map((item:ThemeDesc) => {
             return <List.Item key={item.id} style={{ padding: '5px' }}>
-                <Box padding={0} onMouseEnter={onImgMouseEnter.bind(this, item.id)} onMouseLeave={onMouseLeave.bind(this, item.id)} onClick={onMouseClick.bind(this, item.id)} onDoubleClick={onMouseDbClick.bind(this, item.id)}>
+                <Box padding={0} onMouseEnter={onImgMouseEnter.bind(this, item.id)} onMouseLeave={onMouseLeave.bind(this, item.id)} onClick={onMouseClick.bind(this, item.id)} >
                     <Img
                         className={activeKey == item.id? styles.imageActive:blurKey == item.id? styles.imageBlur: styles.image} 
                         width={200}

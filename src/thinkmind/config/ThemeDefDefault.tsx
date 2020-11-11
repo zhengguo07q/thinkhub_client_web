@@ -13,7 +13,7 @@ export default {
     themeDesc:{
         id:"default",
         name:"默认",
-        img: "http://49.235.127.72/images/brief.png",
+        img: "http://49.235.127.72/images/default.png",
     },
     //主主题样式
     rootTopic: {
@@ -56,7 +56,7 @@ export default {
             lineWidth: 2,                       //行宽
             lineColor: '#a4adbb',               //行颜色
             lineRadius: 1,                     //行角半径
-            collapsedOffset: 5,
+            collapsedOffset: 6,
         },                         
     },             
     //次主题样式
@@ -99,7 +99,7 @@ export default {
             lineWidth: 1,                       //行宽
             lineColor: '#a4adbb',               //行颜色
             lineRadius: 0,                     //行角半径
-            collapsedOffset: 5,
+            collapsedOffset: 6,
         },              
     },          
     //正常主题样式
@@ -141,7 +141,7 @@ export default {
             lineWidth: 1,                       //行宽
             lineColor: '#a4adbb',               //行颜色
             lineRadius: 0,                     //行角半径
-            collapsedOffset: 5,
+            collapsedOffset: 6,
         }           
     },   
     //独立的主题，一般情况下与次级的一样
@@ -185,7 +185,7 @@ export default {
             lineWidth: 1,                       //行宽
             lineColor: '#a5ddfb',               //行颜色
             lineRadius: 0,                     //行角半径
-            collapsedOffset: 3,
+            collapsedOffset: 6,
         },              
     },     
 }

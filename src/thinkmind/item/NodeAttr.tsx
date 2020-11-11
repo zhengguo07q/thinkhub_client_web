@@ -4,7 +4,7 @@ import { LinkAttr } from './LinkAttr';
 import DataCache from '../dataSource/DataCache';
 import { createNewNode, MindData } from '../dataSource/MindData';
 import { TypeUtil } from '../util/TypeUtil';
-import { ThemeType, TopicStyle } from '../config/Theme';
+import { ThemeType, TopicStyle, LinkPositionType, BackgroundModelType } from '../config/Theme';
 import log, {Logger} from 'loglevel';
 
 /**
@@ -46,6 +46,10 @@ export class NodeAttr{
     isTemp:boolean = false;                 //是否为临时节点
 
     linkAttr: LinkAttr;     //链接属性
+
+    linkPos:LinkPositionType;
+    backgroundType:BackgroundModelType;
+    showCollapsed:boolean;
 
     static fromTheme(object:any):NodeAttr{
         let attr = new NodeAttr();
@@ -167,15 +171,6 @@ export class NodeAttr{
         DataCache.updateNode(this.data);
     }
 
-    /**
-     * 更新主题
-     */
-    updateTheme(){
-        let style = ThemeManagerInstance.getTopicStyle(this.themeLevel);
-
-        Object.assign(this, style.contentStyle);
-        Object.assign(this.linkAttr, style.linkStyle);
-    }
 
     /**
      * 交换父节点
@@ -184,18 +179,19 @@ export class NodeAttr{
      * @param pos 
      */
     exchangeNodeAttr(refItems: Map<string, NodeAttr>, newParent:NodeAttr, pos:number){
-        let oldParent = refItems.get(this.data.pid)!;
+        let oldParent = refItems.get(this.data.pid)!;               //得到旧的父亲
         TypeUtil.arrayRemove(oldParent.data.childs, this.data.id);  //把原来的父引用删除
-        this.data.pid = newParent.data.id;
-        TypeUtil.arrayInsert(newParent.data.childs, pos, this.data.id); //把新的引用插入到特定位置
+        this.data.pid = newParent.data.id;                          //当前的pid指向新的父亲
+        this.themeLevel = newParent.themeLevel + 1;
+        TypeUtil.arrayInsert(newParent.data.childs, pos, this.data.id); //把新的引用插入到新的父亲特定位置
 
-        DataCache.exchangeNode(newParent.data.id, this.data.id, pos);
+        DataCache.exchangeNode(oldParent.data.id, this.data.id, pos);
     }
 
     /**
      * 得到含有隐藏节点的列表
      */
-    getHideNode():NodeAttr[]{
+    eachNodeGetHideNode():NodeAttr[]{
         let hides:NodeAttr[] = [];
         this.eachNode((node:NodeAttr)=>{
             if(node.data.isSubVisible == false && node.data.childs.length>0){ //子对象不显示而且含有子对象
@@ -203,5 +199,46 @@ export class NodeAttr{
             }
         })
         return hides;
+    }
+
+    eachNodeGetNodeAllIds():string[]{
+        let ids:string[] = [];
+        this.eachNode((node:NodeAttr)=>{
+            ids.push(node.data.id);
+            }
+        );
+        return ids;
+    }
+
+    /**
+     * 更新子对象主题
+     */
+    eachNodeUpdateTheme(){
+        this.eachNode((node:NodeAttr)=>{
+            let style = ThemeManagerInstance.getTopicStyle(node.themeLevel);
+            console.log("eachNodeUpdateTheme");
+            Object.assign(node, style.contentStyle);
+            Object.assign(node.linkAttr, style.linkStyle);
+        });
+    }
+
+    /**
+     * 获得特定元素在父节点中都位置，排除掉drag
+     * @param id 
+     */
+    getChildPosition(id:string){
+        let idxPos = this.data.childs.indexOf(id);
+        if(idxPos > -1){   //存在则需要检查
+            if(NodeAttr.dragNode != undefined){
+                let dragPos = this.data.childs.indexOf(NodeAttr.dragNode.data.id);
+                if(dragPos > -1){
+                    if(idxPos > dragPos){       //说明都在， 但是前面有drag节点，要去掉
+                        return idxPos - 1;
+                    }else{
+                    }
+                }
+            }
+        }
+        return idxPos;
     }
 } 

@@ -1,5 +1,6 @@
 import { Point } from '../util/Interface';
 import log, { Logger } from 'loglevel';
+import { ThemeManagerInstance } from '../config/ThemeManager';
 
 /**
  * 
@@ -27,6 +28,10 @@ export class BackgroundAttr{
         return Object.assign(attr, object);
     }
 
+    updateTheme(){
+        let theme = ThemeManagerInstance.getTheme();
+        this.background = theme.background;
+    }
     /**
      * 每次调整显示后，需要重新设置外框
      * @param element 

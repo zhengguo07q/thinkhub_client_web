@@ -3,6 +3,7 @@ import { ThemeDesc, ThemeType, TopicStyle } from './Theme';
 import ThemeDefDefault from './ThemeDefDefault';
 import ThemeDefSimple from './ThemeDefSimple';
 import log,{Logger} from 'loglevel';
+import { ThemeCurrentInstance } from './ThemeCurrent';
 
 export enum LevelType {
     ROOT = 1,
@@ -13,13 +14,13 @@ export enum LevelType {
 
 export class ThemeManager {
     logger:Logger = log.getLogger("ThemeManager");
+    themeCacheKey: string = "key_theme";
+    themeNameDefault: string = "default";
 
     themes: Map<string, ThemeType> = new Map<string, ThemeType>();
     themeList: ThemeDesc[] = [];
-    themeNameDefault: string = "default";
     themeName: string;
-    themeDefini;
-    themeCacheKey: string = "themeCache";
+    themeTypeCache:ThemeType|undefined;   //这里保存一份缓存
 
     initial(){
         this.themes.forEach((theme:ThemeType)=>{
@@ -27,9 +28,26 @@ export class ThemeManager {
         });
     }
 
-    getTheme(themeName?: string): ThemeType {
-        themeName = themeName || this.themeName;
-        return this.themes.get(themeName)!;
+    /**
+     * 这里是外界获取主题的唯一出口
+     * @param themeName 
+     */
+    getTheme(): ThemeType {
+        let themeType;
+        if(this.themeTypeCache != undefined){
+            themeType = this.themeTypeCache;
+        }else{
+            let themeName = this.themeName || this.themeNameDefault;
+            themeType = JSON.parse(JSON.stringify(this.themes.get(themeName)!));//进行拷贝，避免对象里面数据被篡改
+        }
+        return ThemeCurrentInstance.merge(themeType);
+    }
+
+    /**
+     * 清除掉缓存，下次需要重新获取最新的
+     */
+    clearTheme(){
+        this.themeTypeCache = undefined;
     }
 
 
@@ -83,7 +101,9 @@ export class ThemeManager {
         if(this.isExistsTheme(themeName)){
             LocalStorageUtil.setItem(this.themeCacheKey, themeName);
             this.themeName = themeName;
+            return true;
         }
+        return false;
     }
 
     /**

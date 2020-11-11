@@ -1,5 +1,6 @@
 import { MindData } from './MindData';
 import log, { Logger } from 'loglevel';
+import { StorageBackupInstance } from './BackupStorage';
 
 type NewDatabase = {
     isNew:boolean
@@ -10,6 +11,7 @@ class StorageUtil {
 
     databaseName = "thinkhub";
     tableName = "mindnode";
+    
     keyId = "id";
     version = 1;
     db:IDBDatabase;
@@ -19,10 +21,10 @@ class StorageUtil {
     /**
      * 打开数据库
      */
-    openDatabase() {
+    make() {
         let that = this;
         let promise = new Promise<NewDatabase>((resolve, reject)=>{
-            that.logger.info("openDatabase")
+            that.logger.info("makeDatabase")
             let request:IDBOpenDBRequest = window.indexedDB.open(this.databaseName, this.version);
             
             request.onerror = function (event) {
@@ -37,11 +39,18 @@ class StorageUtil {
                 that.logger.info("创建新的数据库", that.databaseName);
                 that.db = (event!.target as IDBOpenDBRequest).result;
 
+                //创建存储表
                 if (!that.db.objectStoreNames.contains(that.tableName)) {
-                    let objectStore:IDBObjectStore = that.db.createObjectStore(that.tableName, { keyPath: that.keyId });
-                    objectStore.createIndex('content', 'content', { unique: false });
+                    let storageStore:IDBObjectStore = that.db.createObjectStore(that.tableName, { keyPath: that.keyId });
+                    storageStore.createIndex('content', 'content', { unique: false });
                     that.logger.info("创建表成功", that.tableName);
-                    objectStore.transaction.oncomplete = function (params) {
+                }
+                //创建备份表
+                if (!that.db.objectStoreNames.contains(StorageBackupInstance.tableName)) {
+                    let backupStore:IDBObjectStore = that.db.createObjectStore(StorageBackupInstance.tableName, { keyPath: that.keyId });
+                    backupStore.createIndex('content', 'content', { unique: false });
+                    that.logger.info("创建表成功", StorageBackupInstance.tableName);
+                    backupStore.transaction.oncomplete = function (params) {
                         resolve({isNew:true});
                     }
                 }
@@ -161,6 +170,38 @@ class StorageUtil {
     }
 
     /**
+     * 搜索content，这个非常耗时
+     * @param value 
+     * @param cb 
+     */
+    searchContent(value:string){
+        let that = this;
+        let promise = new Promise<MindData[]>((resolve, reject)=>{
+            var transaction = that.db.transaction([that.tableName], 'readonly');
+            var store = transaction.objectStore(that.tableName);
+            that.logger.debug("search:", value);
+            var request = store.openCursor();
+            let searchList:MindData[] = [];
+            request.onsuccess = function (event) {
+                if(request.result){
+                    let cursor = request.result;
+                    if(cursor){
+                        let mindData = cursor.value as MindData;
+                        if(mindData.content.indexOf(value) > -1){
+                            searchList.push(mindData);
+                        }
+                        cursor.continue();
+                    }
+                } else {
+                    resolve(searchList);
+                    that.logger.error('获得数据记录数量:', searchList.length, " value:", searchList);
+                }
+            }});
+        return promise;
+    }
+
+
+    /**
      * 删除数据
      * @param id 
      */
@@ -178,6 +219,15 @@ class StorageUtil {
             };
         });
         return promise;
+    }
+
+    /**
+     * 清除整张表，这个不是async函数
+     */
+    clear(){
+        this.db.transaction([this.tableName], 'readwrite')
+        .objectStore(this.tableName)
+        .clear();
     }
 }
 

@@ -1,4 +1,3 @@
-import { NodeAttr } from '../item/NodeAttr';
 import { LayoutManager } from '../layout/LayoutManager';
 import { ContextHolder } from '../util/ContextHolder';
 
@@ -9,10 +8,8 @@ export class EditorNode extends ContextHolder{
 
     updateTheme(){
         let nodeLayer = this.sceneContext.nodeLayer;
-        nodeLayer.items.forEach((nodeAttr:NodeAttr)=>{
-            nodeAttr.updateTheme();
-        });
-
+        nodeLayer.rootItem.eachNodeUpdateTheme();
+        nodeLayer.backgroundAttr.updateTheme();
         LayoutManager.getInstance().markChange();
         LayoutManager.getInstance().layout(true);
     }

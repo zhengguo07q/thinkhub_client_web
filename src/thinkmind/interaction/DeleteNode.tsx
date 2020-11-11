@@ -1,6 +1,4 @@
-import { NodeAttr } from '../item/NodeAttr';
 import { LayoutManager } from '../layout/LayoutManager';
-import { RenderManager } from '../render/RenderManager';
 import { ContextHolder } from '../util/ContextHolder';
 import { EventManager, EventType } from '../util/Event';
 import { TypeUtil } from '../util/TypeUtil';
@@ -23,7 +21,7 @@ export class DeleteNode extends ContextHolder{
                 return ;
             }
             
-            let hideNodes = nodeAttr.getHideNode();
+            let hideNodes = nodeAttr.eachNodeGetHideNode();
             if(hideNodes.length > 0){
                 let hidesStr = "";
                 hideNodes.forEach((node)=>{

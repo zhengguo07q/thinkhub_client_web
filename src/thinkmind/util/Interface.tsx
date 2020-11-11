@@ -10,6 +10,13 @@ export class Point {
         let a:number = ((p1.x-p2.x)*(p1.x - p2.x)) + ((p1.y-p2.y)*(p1.y-p2.y));
         return Math.sqrt(a);
     }
+
+    static from(x:number, y:number):Point{
+        let p=  new Point();
+        p.x = x;
+        p.y = y;
+        return p;
+    }
 }
 
 export class Rect {

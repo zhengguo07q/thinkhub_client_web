@@ -30,11 +30,9 @@ const NodeSelectCrumb = (props, context) => {
     }
 
     return (
-        <div className={styles.container}>
-            <Breadcrumb maxNode={5} >
-                {getBreadcrumbItem()}
-            </Breadcrumb>
-        </div>
+        <Breadcrumb maxNode={5} className={styles.container} >
+            {getBreadcrumbItem()}
+        </Breadcrumb>
     );
 };
 

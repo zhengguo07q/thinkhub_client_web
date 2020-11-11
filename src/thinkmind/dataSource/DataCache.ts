@@ -4,7 +4,7 @@ import { JsonCreate } from '../interaction/JsonCreate';
 import StorageUtil from './StorageUtil';
 import { EventManager, EventType } from '../util/Event';
 import log, {Logger} from 'loglevel';
-import { TypeUtil } from '../util/TypeUtil';
+import LocalStorageUtil from '../util/LocalStorageUtil';
 
 
 class DataCache {
@@ -14,8 +14,25 @@ class DataCache {
     cacheSiblings: MindData[] = [];
 
     rootId: string;
-    depth:number = 3;
+    id:string;
+    depth:number = 4;
+    static KEY_DEPTH:string = "key_depth";
 
+    /**
+     * 载入设置的key
+     */
+    getDepth(){
+        let storageDepth = LocalStorageUtil.getItem(DataCache.KEY_DEPTH);
+        if(storageDepth != undefined ){
+            let storageDepthNum = parseInt(storageDepth);
+            if(storageDepthNum >= 1 && storageDepthNum <= 6){
+                this.depth = parseInt(storageDepth);
+            }else{
+                LocalStorageUtil.removeItem(DataCache.KEY_DEPTH)
+            }
+        }
+        return this.depth;
+    }
 
     async setRootDefault(){
         console.info("set default root");
@@ -29,9 +46,11 @@ class DataCache {
      */
     async setRoot(id: string, depth?:number) {
         this.depth = depth || this.depth;
+        this.id = id;
         if(id == undefined){
             return;
         }
+        LocalStorageUtil.setItem(DataCache.KEY_DEPTH, this.depth);
         this.logger.info("set root: ", id, " level: ", this.depth);
 
         this.rootId = await this.checkReferenceRoot(id);
@@ -42,6 +61,13 @@ class DataCache {
         EventManager.dispatcher(EventType.MindDataSetRootNode);
 
         JsonCreate.getInstance<JsonCreate>().create(this.rootId, this.treeMap); //完成了ui事件后再开始渲染树
+    }
+
+    /**
+     * 重新设置，用于刷新
+     */
+    async setRootReset(){
+        this.setRoot(this.id, this.depth);
     }
 
     /**
@@ -112,6 +138,10 @@ class DataCache {
      * @param tabType 
      */
     async updateRecentReference(){
+        if(this.rootId == MindSource.ROOT.id || this.rootId == MindSource.RECENT.id){ //去掉自身，避免死循环
+            return;
+        }
+        
         await MindSource.addRecent(this.rootId);
         MindSource.RECENT_LIST = await MindSource.getSimpleSubNode(MindSource.RECENT);
         MindSource.RECENT_LIST = MindSource.RECENT_LIST.reverse();
@@ -155,14 +185,14 @@ class DataCache {
      * @param sId 
      * @param pos 
      */
-    async exchangeNode(nPId:string, sId:string, pos:number){
-        let sData = this.treeMap.get(sId)!;
-        let pData = this.treeMap.get(sData.pid)!;
-        let nPData = this.treeMap.get(nPId)!;
+    async exchangeNode(oPid:string,  sId:string, pos:number){
+        let sData = this.treeMap.get(sId)!;         //自身
+        let npData = this.treeMap.get(sData.pid)!;   //新的父节点
+        let opData = this.treeMap.get(oPid)!;       //旧的父节点
         
         await StorageUtil.update(sData);
-        await StorageUtil.update(pData);
-        await StorageUtil.update(nPData);
+        await StorageUtil.update(npData);
+        await StorageUtil.update(opData);
     }
 
     /**

@@ -50,17 +50,17 @@ export class EventHelper{
 
     static eventTextareaFocus(e:FocusEvent, n:VNode){
         let inputContent = InputContent.getInstance<InputContent>();
-        inputContent.onFocus.bind(inputContent, e, n)();
+        inputContent.eventTextareaFocus.bind(inputContent, e, n)();
     }
 
     static eventTextareaInput(e:InputEvent, n:VNode){
         let inputContent = InputContent.getInstance<InputContent>();
-        inputContent.onInput.bind(inputContent, e, n)();
+        inputContent.eventTextareaInput.bind(inputContent, e, n)();
     }
 
     static eventTextareaBlur(e:FocusEvent, n:VNode){
         let inputContent = InputContent.getInstance<InputContent>();
-        inputContent.onBlurTextarea.bind(inputContent, e, n)();
+        inputContent.eventTextareaBlur.bind(inputContent, e, n)();
     }
 
     static eventGroupDown(e:MouseEvent, n:VNode){

@@ -3,6 +3,8 @@ import { RenderUtil } from '../render/RenderUtil';
 import { ContextHolder } from '../util/ContextHolder';
 import { RenderObject } from '../render/RenderContext';
 import { LayoutManagerInstance } from '../layout/LayoutManager';
+import { NodeAttr } from '../item/NodeAttr';
+import { MindData } from '../dataSource/MindData';
 
 
 export class SelectNode extends ContextHolder{
@@ -12,6 +14,30 @@ export class SelectNode extends ContextHolder{
         this.shiftState = false;
         document.addEventListener('keydown', this.eventShiftDown)   //shift只有down up事件
         document.addEventListener('keyup', this.eventShiftKeyUp)
+    }
+
+    /**
+     * 检查是否有选择
+     */
+    isSelected():boolean{
+        if(this.sceneContext.nodeLayer.selIdSet.size > 0){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 获得第一个选择对象
+     */
+    firstSelect():MindData|undefined{
+        let nodeLayer = this.sceneContext.nodeLayer;
+        let mindData:MindData|undefined;
+        for(let id of nodeLayer.selIdSet.values()){
+            let node:NodeAttr = nodeLayer.items.get(id)!;
+            mindData = node.data;
+            break;
+        }
+        return mindData;
     }
 
     eventShiftDown(event: KeyboardEvent){
@@ -37,7 +63,6 @@ export class SelectNode extends ContextHolder{
      * @param node 
      */
     eventGroupClick(event: MouseEvent, node:VNode){
-        
         let foreign: any = event.currentTarget;
         let nodeId = RenderUtil.getIdBySel(foreign.id);
         this.logger.debug("点击设置元素", nodeId);
@@ -138,6 +163,10 @@ export class SelectNode extends ContextHolder{
     eventLineLeave(event: MouseEvent, node:VNode){
         let foreign: any = event.currentTarget;
         let nodeId = RenderUtil.getIdBySel(foreign.id);
+        let attr:NodeAttr = this.sceneContext.nodeLayer.items.get(nodeId)!;
+        if(attr.showCollapsed){
+            return;
+        }
         let collapsedElement: HTMLElement = document.getElementById(RenderObject.NodeCollapsed + nodeId)!;
         if(collapsedElement != undefined){
             collapsedElement.style.visibility = 'hidden';

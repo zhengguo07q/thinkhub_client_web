@@ -2,7 +2,7 @@
 class LocalStorageUtil {
     setItem(key: string, val: any) {
         var storage = window.localStorage;
-        if (typeof val === 'string') {
+        if (typeof val === 'string' || typeof val === 'number') {
             storage.setItem(key, val as string);
         } else if (typeof val === 'object') {
             storage.setItem(key, JSON.stringify(val));
