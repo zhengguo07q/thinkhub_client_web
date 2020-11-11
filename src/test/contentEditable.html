@@ -1,0 +1,57 @@
+<html>
+<head>
+    <style type="text/css">
+        #pos_abs {
+            position: absolute;
+            border-color: darkslategrey;
+            border-style: solid;
+            border-radius: 3px;
+            border-width: 5px;
+            background-color: rgb(163, 186, 228);
+            padding: 0 !important;
+            margin: 0 !important;
+            border: 0 !important;
+            box-sizing: border-box;
+            
+            min-width: 10px;
+            max-width: 200px;
+            visibility:visible;
+            overflow: visible;
+        }
+    </style>
+
+</head>
+
+<body>
+    <p>通过绝对定位，元素可以放置到页面上的任何位置。下面的标题距离页面左侧 100px，距离页面顶部 150px。</p>
+    <p contenteditable="true">这是一个段落。是可编辑的。尝试修改文本。</p>
+    <div id="pos_abs" class="pos_abs" contenteditable="true" oninput="oninputPos()"></div>
+
+    <script>
+        var textInput = document.getElementById("pos_abs");
+        textInput.innerHTML = "通过";
+        console.debug(
+            "width: ", textInput.style.getPropertyValue("width"),
+            "height: ", textInput.style.getPropertyValue("height"),
+            "clientWidth: ", textInput.clientWidth,
+            "clientHeight: ", textInput.clientHeight,
+            "offsetWidth: ", textInput.offsetWidth,
+            "offsetHeight: ", textInput.offsetHeight,
+            "scrollWidth: ", textInput.scrollWidth,
+            "scrollHeight: ", textInput.scrollHeight);
+        function oninputPos(e){
+            var textInput = document.getElementById("pos_abs");
+            console.debug(
+            "width: ", textInput.style.getPropertyValue("width"),
+            "height: ", textInput.style.getPropertyValue("height"),
+            "clientWidth: ", textInput.clientWidth,
+            "clientHeight: ", textInput.clientHeight,
+            "offsetWidth: ", textInput.offsetWidth,
+            "offsetHeight: ", textInput.offsetHeight,
+            "scrollWidth: ", textInput.scrollWidth,
+            "scrollHeight: ", textInput.scrollHeight);
+        }
+    </script>
+</body>
+
+</html>
